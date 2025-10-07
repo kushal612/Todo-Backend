@@ -190,48 +190,4 @@ export async function updateTask(req, res, next) {
   } catch (e) {
     next(e)
   }
-
-  //   try {
-  //     const { id } = req.params
-
-  //     const validatedData = await taskUpdateSchema.validate(req.body, {
-  //       abortEarly: false,
-  //       stripUnknown: true,
-  //     })
-
-  //     const data = await readTask()
-  //     const task = data.tasks.find((t) => t.id === id)
-
-  //     if (!task) {
-  //       const error = new Error('Task not found')
-  //       error.status = 404
-  //       return next(error)
-  //     }
-
-  //     if (validatedData.title && typeof validatedData.title === 'string') {
-  //       task.title = validatedData.title
-  //     }
-  //     if (Array.isArray(validatedData.tags)) {
-  //       task.tags = validatedData.tags
-  //     }
-  //     if (
-  //       validatedData.isImportant &&
-  //       typeof validatedData.isImportant === 'string'
-  //     ) {
-  //       task.isImportant = validatedData.isImportant
-  //     }
-  //     if (typeof validatedData.isCompleted === 'boolean') {
-  //       task.isCompleted = validatedData.isCompleted
-  //     }
-
-  //     task.updatedAt = getISTLocalizedTime()
-
-  //     await writeTask(data)
-  //     res.json(task)
-  //   } catch (err) {
-  //     if (err.name === 'ValidationError') {
-  //       err.status = 400
-  //     }
-  //     next(err)
-  //   }
 }
