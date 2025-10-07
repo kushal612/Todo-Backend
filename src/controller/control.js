@@ -1,7 +1,8 @@
 import fs from 'fs'
 import path from 'path'
-import { randomUUID } from 'crypto'
-import { getISTLocalizedTime } from '../utils/utils.js'
+//import { randomUUID } from 'crypto'
+//import { getISTLocalizedTime } from '../utils/utils.js'
+import { taskCreateSchema } from '../validation/validator.js'
 
 const dbPath = path.join('__dirname', 'db.json')
 
@@ -41,8 +42,23 @@ function writeTask(tasks) {
 
 export async function getTasks(req, res, next) {
   try {
-    const todos = await readTask()
-    res.json(todos)
+    const { search } = req.query
+    const data = await readTask()
+    let tasks = data.todos
+
+    if (search && typeof search === 'string') {
+      const searchText = search.toLowerCase()
+
+      tasks = tasks.filter((task) => {
+        return (
+          task.title?.toLowerCase().includes(searchText) ||
+          task.isImportant?.toLowerCase().includes(searchText) ||
+          task.tags?.some((tag) => tag.toLowerCase().includes(searchText))
+        )
+      })
+    }
+
+    res.json(tasks)
   } catch (e) {
     next(e)
   }
@@ -50,30 +66,40 @@ export async function getTasks(req, res, next) {
 
 export async function addTask(req, res, next) {
   try {
-    const { title, tags = [], isImpotant } = req.body
+    const validatedData = await taskCreateSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    })
 
-    if (!title || typeof title !== 'string' || title.trim().length < 3) {
-      const error = new Error('Invalid title (min 3 characters)')
-      error.status = 400
-      return next(error)
+    const newTask = validatedData
+    const data = await readTask()
+    data.tasks.push(newTask)
+    await writeTask(data)
+
+    res.status(201).json(newTask)
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      err.status = 400
     }
-    const todos = await readTask()
-    const newId = randomUUID()
-    const newTodoWithId = {
-      id: newId,
-      title: title.trim(),
-      tags: Array.isArray(tags) ? tags : [],
-      isImpotant: isImpotant.trim(),
-      isCompleted: false,
-      createdAt: getISTLocalizedTime(),
-      updatedAt: getISTLocalizedTime(),
-    }
-    todos.push(newTodoWithId)
-    await writeTask(todos)
-    res.status(201).json(newTodoWithId)
-  } catch (e) {
-    next(e)
+    next(err)
   }
+  //     const todos = await readTask()
+  //     const newId = randomUUID()
+  //     const newTodoWithId = {
+  //       id: newId,
+  //       title: title.trim(),
+  //       tags: Array.isArray(tags) ? tags : [],
+  //       isImpotant: isImpotant.trim(),
+  //       isCompleted: false,
+  //       createdAt: getISTLocalizedTime(),
+  //       updatedAt: getISTLocalizedTime(),
+  //     }
+  //     todos.push(newTodoWithId)
+  //     await writeTask(todos)
+  //     res.status(201).json(newTodoWithId)
+  //   } catch (e) {
+  //     next(e)
+  //   }
 }
 
 export async function deleteTask(req, res, next) {
@@ -94,6 +120,61 @@ export async function deleteTask(req, res, next) {
   }
 }
 
+// export async function searchTask(req, res, next) {
+//   try {
+//     const todos = await readTask()
+
+//     const { q, currentFilter, isImportantFilter } = req.query
+
+//     const query = q ? q.toLowerCase() : ''
+
+//     let importanceFilterArray = []
+//     if (Array.isArray(isImportantFilter)) {
+//       importanceFilterArray = isImportantFilter.map((val) => val.toLowerCase())
+//     } else if (
+//       typeof isImportantFilter === 'string' &&
+//       isImportantFilter.length > 0
+//     ) {
+//       importanceFilterArray = isImportantFilter.toLowerCase().split(',')
+//     }
+
+//     importanceFilterArray = importanceFilterArray.filter((val) => val !== 'all')
+
+//     let visibleTasks = todos.filter((t) => {
+//       if (currentFilter === 'current' && t.isCompleted) return false
+//       if (currentFilter === 'completed' && !t.isCompleted) return false
+
+//       if (importanceFilterArray.length > 0) {
+//         const taskImportance = t.isImpotant
+//           ? String(t.isImpotant).toLowerCase()
+//           : 'low'
+
+//         if (!importanceFilterArray.includes(taskImportance)) {
+//           return false
+//         }
+//       }
+
+//       if (query) {
+//         const matchesTitle = t.title.toLowerCase().includes(query)
+
+//         const matchesTag = t.tags.some((tag) =>
+//           tag.toLowerCase().includes(query)
+//         )
+
+//         if (!matchesTitle && !matchesTag) {
+//           return false
+//         }
+//       }
+
+//       return true
+//     })
+
+//     res.json(visibleTasks)
+//   } catch (e) {
+//     next(e)
+//   }
+// }
+
 export async function updateTask(req, res, next) {
   try {
     const todos = await readTask()
@@ -109,4 +190,48 @@ export async function updateTask(req, res, next) {
   } catch (e) {
     next(e)
   }
+
+  //   try {
+  //     const { id } = req.params
+
+  //     const validatedData = await taskUpdateSchema.validate(req.body, {
+  //       abortEarly: false,
+  //       stripUnknown: true,
+  //     })
+
+  //     const data = await readTask()
+  //     const task = data.tasks.find((t) => t.id === id)
+
+  //     if (!task) {
+  //       const error = new Error('Task not found')
+  //       error.status = 404
+  //       return next(error)
+  //     }
+
+  //     if (validatedData.title && typeof validatedData.title === 'string') {
+  //       task.title = validatedData.title
+  //     }
+  //     if (Array.isArray(validatedData.tags)) {
+  //       task.tags = validatedData.tags
+  //     }
+  //     if (
+  //       validatedData.isImportant &&
+  //       typeof validatedData.isImportant === 'string'
+  //     ) {
+  //       task.isImportant = validatedData.isImportant
+  //     }
+  //     if (typeof validatedData.isCompleted === 'boolean') {
+  //       task.isCompleted = validatedData.isCompleted
+  //     }
+
+  //     task.updatedAt = getISTLocalizedTime()
+
+  //     await writeTask(data)
+  //     res.json(task)
+  //   } catch (err) {
+  //     if (err.name === 'ValidationError') {
+  //       err.status = 400
+  //     }
+  //     next(err)
+  //   }
 }
