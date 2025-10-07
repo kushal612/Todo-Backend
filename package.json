@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "db": "npx json-server --watch database/db.json --port 3000",
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
     "format": "npx prettier --write .",
