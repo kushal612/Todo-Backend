@@ -15,7 +15,7 @@ router.use((req, res, next) => {
 
 router.get('/todos', getTasks)
 router.post('/todos', addTask)
-router.put('/todos/:id', updateTask)
-router.delete('/todos/:id', deleteTask)
+router.put('/todos:id', updateTask)
+router.delete('/todos:id', deleteTask)
 
 export default router

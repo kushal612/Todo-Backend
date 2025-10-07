@@ -1,8 +1,9 @@
 import fs from 'fs'
 import path from 'path'
 import { randomUUID } from 'crypto'
+import { getISTLocalizedTime } from '../utils/utils.js'
 
-const dbPath = path.join('__dirname', '../database/db.json')
+const dbPath = path.join('__dirname', 'db.json')
 
 function readTask() {
   return new Promise((resolve, reject) => {
@@ -49,9 +50,24 @@ export async function getTasks(req, res, next) {
 
 export async function addTask(req, res, next) {
   try {
+    const { title, tags = [], isImpotant } = req.body
+
+    if (!title || typeof title !== 'string' || title.trim().length < 3) {
+      const error = new Error('Invalid title (min 3 characters)')
+      error.status = 400
+      return next(error)
+    }
     const todos = await readTask()
     const newId = randomUUID()
-    const newTodoWithId = { id: newId, ...req.body }
+    const newTodoWithId = {
+      id: newId,
+      title: title.trim(),
+      tags: Array.isArray(tags) ? tags : [],
+      isImpotant: isImpotant.trim(),
+      isCompleted: false,
+      createdAt: getISTLocalizedTime(),
+      updatedAt: getISTLocalizedTime(),
+    }
     todos.push(newTodoWithId)
     await writeTask(todos)
     res.status(201).json(newTodoWithId)
@@ -88,7 +104,7 @@ export async function updateTask(req, res, next) {
     } else {
       todos[index] = { ...todos[index], ...req.body }
       await writeTask(todos)
-      res.json(todos[index])
+      res.status(201).json(todos[index])
     }
   } catch (e) {
     next(e)
