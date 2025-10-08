@@ -103,23 +103,6 @@ export async function addTask(req, res, next) {
     }
     next(err)
   }
-  //     const todos = await readTask()
-  //     const newId = randomUUID()
-  //     const newTodoWithId = {
-  //       id: newId,
-  //       title: title.trim(),
-  //       tags: Array.isArray(tags) ? tags : [],
-  //       isImpotant: isImpotant.trim(),
-  //       isCompleted: false,
-  //       createdAt: getISTLocalizedTime(),
-  //       updatedAt: getISTLocalizedTime(),
-  //     }
-  //     todos.push(newTodoWithId)
-  //     await writeTask(todos)
-  //     res.status(201).json(newTodoWithId)
-  //   } catch (e) {
-  //     next(e)
-  //   }
 }
 
 export async function deleteTask(req, res, next) {
@@ -139,61 +122,6 @@ export async function deleteTask(req, res, next) {
     next(e)
   }
 }
-
-// export async function searchTask(req, res, next) {
-//   try {
-//     const todos = await readTask()
-
-//     const { q, currentFilter, isImportantFilter } = req.query
-
-//     const query = q ? q.toLowerCase() : ''
-
-//     let importanceFilterArray = []
-//     if (Array.isArray(isImportantFilter)) {
-//       importanceFilterArray = isImportantFilter.map((val) => val.toLowerCase())
-//     } else if (
-//       typeof isImportantFilter === 'string' &&
-//       isImportantFilter.length > 0
-//     ) {
-//       importanceFilterArray = isImportantFilter.toLowerCase().split(',')
-//     }
-
-//     importanceFilterArray = importanceFilterArray.filter((val) => val !== 'all')
-
-//     let visibleTasks = todos.filter((t) => {
-//       if (currentFilter === 'current' && t.isCompleted) return false
-//       if (currentFilter === 'completed' && !t.isCompleted) return false
-
-//       if (importanceFilterArray.length > 0) {
-//         const taskImportance = t.isImpotant
-//           ? String(t.isImpotant).toLowerCase()
-//           : 'low'
-
-//         if (!importanceFilterArray.includes(taskImportance)) {
-//           return false
-//         }
-//       }
-
-//       if (query) {
-//         const matchesTitle = t.title.toLowerCase().includes(query)
-
-//         const matchesTag = t.tags.some((tag) =>
-//           tag.toLowerCase().includes(query)
-//         )
-
-//         if (!matchesTitle && !matchesTag) {
-//           return false
-//         }
-//       }
-
-//       return true
-//     })
-
-//     res.json(visibleTasks)
-//   } catch (e) {
-//     next(e)
-//   }
-// }
 
 export async function updateTask(req, res, next) {
   try {

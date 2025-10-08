@@ -2,7 +2,7 @@ export const validateRequest = async (schema, data, next) => {
   try {
     const validatedData = await schema.validate(data, {
       abortEarly: false,
-      stripUnknown: true, // remove unexpected fields
+      stripUnknown: true,
     })
     return validatedData
   } catch (err) {

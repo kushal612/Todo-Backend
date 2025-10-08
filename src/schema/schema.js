@@ -11,10 +11,3 @@ export const taskCreateSchema = yup.object({
   createdAt: yup.string().default(() => getISTLocalizedTime()),
   updatedAt: yup.string().default(() => getISTLocalizedTime()),
 })
-
-export const taskUpdateSchema = yup.object({
-  title: yup.string().trim(),
-  tags: yup.array().of(yup.string()),
-  isImpotant: yup.string(),
-  isCompleted: yup.boolean(),
-})
