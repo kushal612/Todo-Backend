@@ -104,13 +104,13 @@
     {
       "id": "029c",
       "title": "tyvgu",
-      "isCompleted": false,
+      "isCompleted": true,
       "isImpotant": "high",
       "tags": [
         "cgv"
       ],
       "createdAt": "2025-10-08T07:12:16.203Z",
-      "updatedAt": "2025-10-08T07:12:16.203Z"
+      "updatedAt": "2025-10-08T07:49:13.203Z"
     }
   ]
 }
