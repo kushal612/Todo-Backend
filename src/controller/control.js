@@ -37,6 +37,24 @@ export async function getDocument(req, res, next) {
     next(err)
   }
 }
+
+export async function getDocumentById(req, res, next) {
+  try {
+    const id = req.params.id
+    console.log(id)
+
+    const task = await Task.findById(id)
+    if (!task) {
+      const error = new Error(`Todo with id ${id} not found`)
+      error.statusCode = 404
+      throw error
+    }
+    res.status(200).json(task)
+  } catch (err) {
+    next(err)
+  }
+}
+
 // const dbPath = path.join('__dirname', 'db.json')
 
 // function readTask() {
