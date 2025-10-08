@@ -55,6 +55,22 @@ export async function getDocumentById(req, res, next) {
   }
 }
 
+export async function updateDocument(req, res, next) {
+  try {
+    const id = req.params.id
+    console.log(id)
+
+    const updatedTask = await Task.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    })
+    updatedTask.save()
+    res.json({ message: 'Todo updated successfully', Task: Task[id] })
+  } catch (err) {
+    next(err)
+  }
+}
+
 // const dbPath = path.join('__dirname', 'db.json')
 
 // function readTask() {

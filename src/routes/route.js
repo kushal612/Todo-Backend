@@ -7,6 +7,7 @@ import {
   postDocument,
   getDocument,
   getDocumentById,
+  updateDocument,
 } from '../controller/control.js'
 
 const router = Router()
@@ -22,6 +23,7 @@ router.use((req, res, next) => {
 // router.delete('/todos:id', deleteTask)
 
 router.post('/tasks', postDocument)
+router.post('/tasks/:id', updateDocument)
 router.get('/tasks', getDocument)
 router.get('/tasks/:id', getDocumentById)
 export default router
