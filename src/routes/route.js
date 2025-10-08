@@ -1,9 +1,10 @@
 import { Router } from 'express'
 import {
-  getTasks,
-  addTask,
-  updateTask,
-  deleteTask,
+  // getTasks,
+  // addTask,
+  // updateTask,
+  // deleteTask,
+  postDocument,
 } from '../controller/control.js'
 
 const router = Router()
@@ -13,9 +14,11 @@ router.use((req, res, next) => {
   next()
 })
 
-router.get('/todos', getTasks)
-router.post('/todos', addTask)
-router.put('/todos:id', updateTask)
-router.delete('/todos:id', deleteTask)
+// router.get('/todos', getTasks)
+// router.post('/todos', addTask)
+// router.put('/todos:id', updateTask)
+// router.delete('/todos:id', deleteTask)
+
+router.post('/tasks', postDocument)
 
 export default router

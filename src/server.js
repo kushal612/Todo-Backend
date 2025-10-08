@@ -25,8 +25,9 @@ app.use((err, res, req, next) => {
   }
 })
 
-app.use('/api/tasks', router)
+//app.use('/api/tasks', router)
 
+app.use('/api', router)
 app.listen(port, () => {
   console.log(`"message": "server is up and running"`)
 })
