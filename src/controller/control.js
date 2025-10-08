@@ -2,7 +2,8 @@ import fs from 'fs'
 import path from 'path'
 //import { randomUUID } from 'crypto'
 //import { getISTLocalizedTime } from '../utils/utils.js'
-import { taskCreateSchema } from '../validation/validator.js'
+import { taskCreateSchema } from '../schema/schema.js'
+import { validateRequest } from '../validation/validator.js'
 
 const dbPath = path.join('__dirname', 'db.json')
 
@@ -42,7 +43,7 @@ function writeTask(tasks) {
 
 export async function getTasks(req, res, next) {
   try {
-    const { search } = req.query
+    const { search, status = 'all', priority } = req.query
     const data = await readTask()
     let tasks = data.todos
 
@@ -52,11 +53,33 @@ export async function getTasks(req, res, next) {
       tasks = tasks.filter((task) => {
         return (
           task.title?.toLowerCase().includes(searchText) ||
-          task.isImportant?.toLowerCase().includes(searchText) ||
+          task.isImpotant?.toLowerCase().includes(searchText) ||
           task.tags?.some((tag) => tag.toLowerCase().includes(searchText))
         )
       })
     }
+
+    if (status === 'completed') {
+      tasks = tasks.filter((task) => {
+        task.isCompleted === 'true'
+      })
+    } else if (status === 'pending') {
+      tasks = tasks.filter((task) => {
+        task.isCompleted === 'false'
+      })
+    }
+
+    if (priority && typeof priority === 'string') {
+      tasks = tasks.filter((task) => {
+        task.isImpotant?.toLowerCase() === priority.toLowerCase()
+      })
+    }
+
+    tasks.sort((a, b) => {
+      if (a.updatedAt || b.updatedAt)
+        return new Date(b.updatedAt) - new Date(a.updatedAt)
+      return new Date(b.createdAt) - new Date(a.createdAt)
+    })
 
     res.json(tasks)
   } catch (e) {
@@ -65,12 +88,9 @@ export async function getTasks(req, res, next) {
 }
 
 export async function addTask(req, res, next) {
+  const validatedData = await validateRequest(taskCreateSchema, req.body, next)
+  if (!validatedData) return
   try {
-    const validatedData = await taskCreateSchema.validate(req.body, {
-      abortEarly: false,
-      stripUnknown: true,
-    })
-
     const newTask = validatedData
     const data = await readTask()
     data.tasks.push(newTask)
