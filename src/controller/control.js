@@ -29,7 +29,14 @@ export async function postDocument(req, res, next) {
   }
 }
 
-export async function getDocument(req, res, next) {}
+export async function getDocument(req, res, next) {
+  try {
+    const allTask = await Task.find({})
+    res.send(allTask)
+  } catch (err) {
+    next(err)
+  }
+}
 // const dbPath = path.join('__dirname', 'db.json')
 
 // function readTask() {

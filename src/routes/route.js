@@ -5,6 +5,7 @@ import {
   // updateTask,
   // deleteTask,
   postDocument,
+  getDocument,
 } from '../controller/control.js'
 
 const router = Router()
@@ -20,5 +21,5 @@ router.use((req, res, next) => {
 // router.delete('/todos:id', deleteTask)
 
 router.post('/tasks', postDocument)
-
+router.get('/tasks', getDocument)
 export default router
