@@ -71,6 +71,26 @@ export async function updateDocument(req, res, next) {
   }
 }
 
+export async function deleteById(req, res, next) {
+  try {
+    const id = req.params.id
+    console.log(id)
+    const deletedTask = await Task.findByIdAndDelete(id)
+
+    if (!deletedTask) {
+      const error = new Error(`Todo with id ${id} not found.`)
+      error.statusCode = 404
+      throw error
+    }
+    console.log(`Todo ${id} deleted`)
+    res
+      .status(200)
+      .json({ message: 'Todo deleted successfully', id: deletedTask._id })
+  } catch (err) {
+    next(err)
+  }
+}
+
 // const dbPath = path.join('__dirname', 'db.json')
 
 // function readTask() {
