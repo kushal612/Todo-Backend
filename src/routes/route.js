@@ -10,6 +10,9 @@ import {
   updateDocument,
   deleteById,
 } from '../controller/control.js'
+import TodoValidations from '../validation/middleware/TodoValidation.js'
+
+const validationMiddleware = new TodoValidations()
 
 const router = Router()
 
@@ -23,8 +26,8 @@ router.use((req, res, next) => {
 // router.put('/todos:id', updateTask)
 // router.delete('/todos:id', deleteTask)
 
-router.post('/tasks', postDocument)
-router.post('/tasks/:id', updateDocument)
+router.post('/tasks', validationMiddleware.validateRequest, postDocument)
+router.post('/tasks/:id', validationMiddleware.updateRequest, updateDocument)
 router.get('/tasks', getDocument)
 router.get('/tasks/:id', getDocumentById)
 router.delete('/tasks/:id', deleteById)

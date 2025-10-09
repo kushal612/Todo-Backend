@@ -72,9 +72,7 @@ export async function deleteById(req, res, next) {
       throw error
     }
     console.log(`Todo ${id} deleted`)
-    res
-      .status(200)
-      .json({ message: 'Todo deleted successfully', id: deletedTask._id })
+    res.status(200).json({ message: 'Todo deleted successfully' })
   } catch (err) {
     next(err)
   }
