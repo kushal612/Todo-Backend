@@ -12,7 +12,7 @@ export const postSchema = yup.object({
 
   //   body: yup.string().required(),
   tags: yup.array().optional(),
-  isImpotant: yup.boolean().default(false),
+  isImportant: yup.boolean().default(false),
 })
 
 export const updateSchema = yup.object({
@@ -23,5 +23,5 @@ export const updateSchema = yup.object({
     .optional(),
   isCompleted: yup.boolean().optional(),
   tags: yup.array().optional(),
-  isImpotant: yup.boolean().optional(),
+  isImportant: yup.boolean().optional(),
 })

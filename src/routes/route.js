@@ -5,7 +5,7 @@ import {
   // updateTask,
   // deleteTask,
   postDocument,
-  getDocument,
+  getFilteredTasks,
   getDocumentById,
   updateDocument,
   deleteById,
@@ -29,7 +29,7 @@ router.use((req, res, next) => {
 
 router.post('/tasks', validationMiddleware.validateRequest, postDocument)
 router.post('/tasks/:id', validationMiddleware.updateRequest, updateDocument)
-router.get('/tasks', getDocument)
+router.get('/tasks', getFilteredTasks)
 router.get('/tasks/search', searchDocuments)
 router.get('/tasks/:id', getDocumentById)
 router.delete('/tasks/:id', deleteById)

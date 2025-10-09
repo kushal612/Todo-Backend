@@ -4,10 +4,10 @@
 // //import { getISTLocalizedTime } from '../utils/utils.js'
 import Task from '../model/taskModel.js'
 
+// Create task
 export async function postDocument(req, res, next) {
   try {
     const newTodo = await Task.create(req.body)
-    newTodo.save()
     console.log('New Todo Added:', newTodo.title)
     res.status(201).json({
       message: 'Todo added successfully',
@@ -18,19 +18,62 @@ export async function postDocument(req, res, next) {
   }
 }
 
-export async function getDocument(req, res, next) {
+// Get tasks
+// export async function getDocument(req, res, next) {
+//   try {
+//     const allTask = await Task.find({})
+//     res.status(200).json(allTask)
+//   } catch (err) {
+//     next(err)
+//   }
+// }
+
+export async function getFilteredTasks(req, res, next) {
   try {
-    const allTask = await Task.find({})
-    res.send(allTask)
+    const { search, filter = 'all', importance, sort = 'updatedAt' } = req.query
+
+    let query = {}
+
+    // Filter by completion status
+    if (filter === 'current') {
+      query.isCompleted = false
+    } else if (filter === 'completed') {
+      query.isCompleted = true
+    }
+
+    // Filter by importance
+    if (importance && importance !== 'all') {
+      query.isImportant = importance.toLowerCase()
+    }
+
+    // Search by title or tags
+    if (search) {
+      const regex = new RegExp(search, 'i')
+      query.$or = [{ title: { $regex: regex } }, { tags: { $regex: regex } }]
+    }
+
+    // Build sort object
+    let sortObj = {}
+    if (sort === 'importance') {
+      // Custom sort logic (e.g., high > medium > low)
+      // Need to handle this manually if required
+    } else {
+      sortObj[sort] = -1 // Default descending
+    }
+
+    const tasks = await Task.find(query).sort(sortObj)
+
+    res.status(200).json(tasks)
   } catch (err) {
     next(err)
   }
 }
 
+// Get task by ID
 export async function getDocumentById(req, res, next) {
   try {
     const id = req.params.id
-    console.log(id)
+    console.log(`Fetching task with id: ${id}`)
 
     const task = await Task.findById(id)
     if (!task) {
@@ -44,26 +87,38 @@ export async function getDocumentById(req, res, next) {
   }
 }
 
+// Update task by ID
 export async function updateDocument(req, res, next) {
   try {
     const id = req.params.id
-    console.log(id)
+    console.log(`Updating task with id: ${id}`)
 
     const updatedTask = await Task.findByIdAndUpdate(id, req.body, {
       new: true,
       runValidators: true,
     })
-    updatedTask.save()
-    res.json({ message: 'Todo updated successfully', Task: Task[id] })
+
+    if (!updatedTask) {
+      const error = new Error(`Todo with id ${id} not found`)
+      error.statusCode = 404
+      throw error
+    }
+
+    res.status(200).json({
+      message: 'Todo updated successfully',
+      task: updatedTask,
+    })
   } catch (err) {
     next(err)
   }
 }
 
+// Delete task by ID
 export async function deleteById(req, res, next) {
   try {
     const id = req.params.id
-    console.log(id)
+    console.log(`Deleting task with id: ${id}`)
+
     const deletedTask = await Task.findByIdAndDelete(id)
 
     if (!deletedTask) {
@@ -71,6 +126,7 @@ export async function deleteById(req, res, next) {
       error.statusCode = 404
       throw error
     }
+
     console.log(`Task with id: ${id} is deleted`)
     res.status(200).json({ message: 'Todo deleted successfully' })
   } catch (err) {
@@ -78,16 +134,17 @@ export async function deleteById(req, res, next) {
   }
 }
 
+// Search tasks by query
 export async function searchDocuments(req, res, next) {
   try {
-    const { isImpotant, isCompleted, tags, title } = req.query
+    const { isImportant, isCompleted, tags, title } = req.query
 
     let filter = {}
 
-    if (isImpotant === 'true') {
-      filter.isImpotant = true
-    } else if (isImpotant === 'false') {
-      filter.isImpotant = false
+    if (isImportant === 'true') {
+      filter.isImportant = true
+    } else if (isImportant === 'false') {
+      filter.isImportant = false
     }
 
     if (isCompleted === 'true') {
@@ -98,21 +155,20 @@ export async function searchDocuments(req, res, next) {
 
     if (title || tags) {
       const searchTerm = title || tags
-
       const searchRegex = new RegExp(searchTerm, 'i')
 
       filter.$or = [
-        { tags: { $in: [searchRegex] } },
         { title: { $regex: searchRegex } },
+        { tags: { $in: [searchRegex] } },
       ]
     }
 
     const tasks = await Task.find(filter)
 
     if (tasks.length === 0 && Object.keys(filter).length > 0) {
-      return res
-        .status(404)
-        .json({ message: 'No tasks found matching your search criteria.' })
+      return res.status(404).json({
+        message: 'No tasks found matching your search criteria.',
+      })
     }
 
     res.status(200).json(tasks)
@@ -120,6 +176,8 @@ export async function searchDocuments(req, res, next) {
     next(err)
   }
 }
+
+//toggle
 
 // const dbPath = path.join('__dirname', 'db.json')
 
