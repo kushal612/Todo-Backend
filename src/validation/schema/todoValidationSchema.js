@@ -1,4 +1,4 @@
-import * as yup from 'yup'
+import * as yup from 'yup';
 //import randomUUID from 'crypto'
 
 export const postSchema = yup.object({
@@ -10,7 +10,7 @@ export const postSchema = yup.object({
   isCompleted: yup.boolean().default(false),
   tags: yup.array().optional(),
   isImportant: yup.boolean().default(false),
-})
+});
 
 export const updateSchema = yup.object({
   title: yup
@@ -21,4 +21,4 @@ export const updateSchema = yup.object({
   isCompleted: yup.boolean().optional(),
   tags: yup.array().optional(),
   isImportant: yup.boolean().optional(),
-})
+});

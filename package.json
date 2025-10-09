@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "db": "npx json-server --watch database/db.json --port 3000",
-    "dev": "node --watch src/server.js",
-    "start": "node src/server.js",
+    "dev": "nodemon --inspect src/server.js",
     "format": "npx prettier --write .",
     "lint": "npx eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -21,7 +20,7 @@
     "express": "^5.1.0",
     "mongodb": "^6.20.0",
     "mongoose": "^8.19.1",
-    "mongose": "^0.0.2-security",
+    "nodemon": "^3.1.10",
     "yup": "^1.7.1"
   },
   "devDependencies": {

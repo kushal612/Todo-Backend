@@ -1,6 +1,6 @@
-import * as yup from 'yup'
-import { randomUUID } from 'crypto'
-import { getISTLocalizedTime } from '../utils/utils.js'
+import * as yup from 'yup';
+import { randomUUID } from 'crypto';
+import { getISTLocalizedTime } from '../utils/utils.js';
 
 export const taskCreateSchema = yup.object({
   id: yup.string().default(() => randomUUID()),
@@ -10,4 +10,4 @@ export const taskCreateSchema = yup.object({
   isCompleted: yup.boolean().default(false),
   createdAt: yup.string().default(() => getISTLocalizedTime()),
   updatedAt: yup.string().default(() => getISTLocalizedTime()),
-})
+});

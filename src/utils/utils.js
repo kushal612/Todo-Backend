@@ -1,5 +1,5 @@
 export function getISTLocalizedTime() {
-  const now = new Date()
+  const now = new Date();
   const options = {
     timeZone: 'Asia/Kolkata',
     hour: 'numeric',
@@ -9,6 +9,6 @@ export function getISTLocalizedTime() {
     month: 'numeric',
     day: 'numeric',
     hour12: true,
-  }
-  return now.toLocaleString('en-IN', options)
+  };
+  return now.toLocaleString('en-IN', options);
 }

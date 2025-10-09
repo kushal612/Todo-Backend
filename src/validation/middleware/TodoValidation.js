@@ -1,4 +1,4 @@
-import { postSchema, updateSchema } from '../schema/todoValidationSchema.js'
+import { postSchema, updateSchema } from '../schema/todoValidationSchema.js';
 
 export default class TodoValidations {
   validateRequest = async (req, res, next) => {
@@ -6,34 +6,34 @@ export default class TodoValidations {
       await postSchema.validate(req.body, {
         abortEarly: false,
         stripUnknown: true,
-      })
+      });
 
-      next()
+      next();
     } catch (err) {
       if (err.name === 'ValidationError') {
-        err.status = 400
-        next(new Error(err.errors.join(', ')))
+        err.status = 400;
+        next(new Error(err.errors.join(', ')));
       }
 
-      console.log({ err })
-      next(err)
+      console.log({ err });
+      next(err);
     }
-  }
+  };
 
   updateRequest = async (req, res, next) => {
     try {
       await updateSchema.validate(req.body, {
         abortEarly: false,
         stripUnknown: true,
-      })
+      });
 
-      next()
+      next();
     } catch (err) {
       if (err.name === 'ValidationError') {
-        err.status = 400
+        err.status = 400;
       }
 
-      next(err)
+      next(err);
     }
-  }
+  };
 }
