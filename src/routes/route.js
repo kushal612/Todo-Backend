@@ -1,19 +1,23 @@
 import { Router } from 'express'
-import {
-  // getTasks,
-  // addTask,
-  // updateTask,
-  // deleteTask,
-  postDocument,
-  getFilteredTasks,
-  getDocumentById,
-  updateDocument,
-  deleteById,
-  searchDocuments,
-} from '../controller/control.js'
+// import {
+//   // getTasks,
+//   // addTask,
+//   // updateTask,
+//   // deleteTask,
+//   postDocument,
+//   getDocumentById,
+//   updateDocument,
+//   deleteById,
+//   searchDocuments,
+//   getDocument,
+// } from '../controller/Control.js'
+
+import Control from '../controller/control.js'
 import TodoValidations from '../validation/middleware/TodoValidation.js'
 
 const validationMiddleware = new TodoValidations()
+
+const control = new Control()
 
 const router = Router()
 
@@ -27,11 +31,19 @@ router.use((req, res, next) => {
 // router.put('/todos:id', updateTask)
 // router.delete('/todos:id', deleteTask)
 
-router.post('/tasks', validationMiddleware.validateRequest, postDocument)
-router.post('/tasks/:id', validationMiddleware.updateRequest, updateDocument)
-router.get('/tasks', getFilteredTasks)
-router.get('/tasks/search', searchDocuments)
-router.get('/tasks/:id', getDocumentById)
-router.delete('/tasks/:id', deleteById)
+router.post(
+  '/tasks',
+  validationMiddleware.validateRequest,
+  control.postDocument
+)
+router.post(
+  '/tasks/:id',
+  validationMiddleware.updateRequest,
+  control.updateDocument
+)
+router.get('/tasks/search', control.searchDocuments)
+router.get('/tasks/:id', control.getDocumentById)
+router.get('/tasks', control.getDocument)
+router.delete('/tasks/:id', control.deleteById)
 
 export default router

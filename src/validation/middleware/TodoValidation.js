@@ -4,8 +4,8 @@ export default class TodoValidations {
   validateRequest = async (req, res, next) => {
     try {
       await postSchema.validate(req.body, {
-        abortEarly: false, // return all validation errors
-        stripUnknown: true, // remove unexpected fields
+        abortEarly: false,
+        stripUnknown: true,
       })
 
       next()
@@ -23,8 +23,8 @@ export default class TodoValidations {
   updateRequest = async (req, res, next) => {
     try {
       await updateSchema.validate(req.body, {
-        abortEarly: false, //return all validations error
-        stripUnknown: true, //remove unexpected fields
+        abortEarly: false,
+        stripUnknown: true,
       })
 
       next()
