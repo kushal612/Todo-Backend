@@ -2,16 +2,11 @@
 // import path from 'path'
 // //import { randomUUID } from 'crypto'
 // //import { getISTLocalizedTime } from '../utils/utils.js'
-import { taskCreateSchema } from '../schema/schema.js'
-import { validateRequest } from '../validation/validator.js'
 import Task from '../model/taskModel.js'
 
 export async function postDocument(req, res, next) {
-  const validatedData = await validateRequest(taskCreateSchema, req.body, next)
-  if (!validatedData) return
-
   try {
-    const newTodo = await Task.create(validatedData)
+    const newTodo = await Task.create(req.body)
     newTodo.save()
     console.log('New Todo Added:', newTodo.title)
     res.status(201).json({
@@ -19,12 +14,6 @@ export async function postDocument(req, res, next) {
       todo: newTodo,
     })
   } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(400).json({
-        message: 'Validation failed',
-        error: err.message,
-      })
-    }
     next(err)
   }
 }
