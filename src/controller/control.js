@@ -9,7 +9,7 @@ export default class Control {
   postDocument = async (req, res, next) => {
     try {
       const newTodo = await Task.create(req.body);
-      console.log('New Todo Added:', newTodo.title);
+
       res.status(201).json({
         message: 'Todo added successfully',
         todo: newTodo,
@@ -22,6 +22,7 @@ export default class Control {
   getDocument = async (req, res, next) => {
     try {
       const allTask = await Task.find({});
+
       res.status(200).json(allTask);
     } catch (err) {
       next(err);
@@ -31,11 +32,12 @@ export default class Control {
   getDocumentById = async (req, res, next) => {
     try {
       const id = req.params.id;
-      console.log(`Fetching task with id: ${id}`);
-
+      // console.log(`Fetching task with id: ${id}`);
       const task = await Task.findById(id);
+
       if (!task) {
         const error = new Error(`Todo with id ${id} not found`);
+
         error.statusCode = 404;
         throw error;
       }

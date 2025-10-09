@@ -12,7 +12,7 @@ import { Router } from 'express';
 //   getDocument,
 // } from '../controller/Control.js'
 
-import Control from '../controller/control.js'; //if i use I it also work but it show red underline
+import Control from '../controller/Control.js'; //if i use I it also work but it show red underline
 import TodoValidations from '../validation/middleware/TodoValidation.js';
 
 const validationMiddleware = new TodoValidations();

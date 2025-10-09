@@ -19,6 +19,7 @@ app.use('/api', router);
 app.use((err, res, req, next) => {
   try {
     const status = err.status || 500;
+
     res.status(status).join({
       error: err.message || 'Server Error',
     });
