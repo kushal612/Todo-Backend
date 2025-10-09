@@ -10,7 +10,7 @@ export const postSchema = yup.object({
     .required('Title is required'),
   isCompleted: yup.boolean().default(false),
 
-  body: yup.string().required(),
+  //   body: yup.string().required(),
   tags: yup.array().optional(),
   isImpotant: yup.boolean().default(false),
 })
