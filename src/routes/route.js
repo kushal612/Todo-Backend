@@ -9,6 +9,7 @@ import {
   getDocumentById,
   updateDocument,
   deleteById,
+  searchDocuments,
 } from '../controller/control.js'
 import TodoValidations from '../validation/middleware/TodoValidation.js'
 
@@ -29,6 +30,7 @@ router.use((req, res, next) => {
 router.post('/tasks', validationMiddleware.validateRequest, postDocument)
 router.post('/tasks/:id', validationMiddleware.updateRequest, updateDocument)
 router.get('/tasks', getDocument)
+router.get('/tasks/search', searchDocuments)
 router.get('/tasks/:id', getDocumentById)
 router.delete('/tasks/:id', deleteById)
 

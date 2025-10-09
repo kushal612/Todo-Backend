@@ -71,8 +71,51 @@ export async function deleteById(req, res, next) {
       error.statusCode = 404
       throw error
     }
-    console.log(`Todo ${id} deleted`)
+    console.log(`Task with id: ${id} is deleted`)
     res.status(200).json({ message: 'Todo deleted successfully' })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function searchDocuments(req, res, next) {
+  try {
+    const { isImpotant, isCompleted, tags, title } = req.query
+
+    let filter = {}
+
+    if (isImpotant === 'true') {
+      filter.isImpotant = true
+    } else if (isImpotant === 'false') {
+      filter.isImpotant = false
+    }
+
+    if (isCompleted === 'true') {
+      filter.isCompleted = true
+    } else if (isCompleted === 'false') {
+      filter.isCompleted = false
+    }
+
+    if (title || tags) {
+      const searchTerm = title || tags
+
+      const searchRegex = new RegExp(searchTerm, 'i')
+
+      filter.$or = [
+        { tags: { $in: [searchRegex] } },
+        { title: { $regex: searchRegex } },
+      ]
+    }
+
+    const tasks = await Task.find(filter)
+
+    if (tasks.length === 0 && Object.keys(filter).length > 0) {
+      return res
+        .status(404)
+        .json({ message: 'No tasks found matching your search criteria.' })
+    }
+
+    res.status(200).json(tasks)
   } catch (err) {
     next(err)
   }

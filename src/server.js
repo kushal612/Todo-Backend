@@ -13,6 +13,8 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+app.use('/api', router)
+
 // eslint-disable-next-line
 app.use((err, res, req, next) => {
   try {
@@ -27,7 +29,6 @@ app.use((err, res, req, next) => {
 
 //app.use('/api/tasks', router)
 
-app.use('/api', router)
 app.listen(port, () => {
   console.log(`"message": "server is up and running"`)
 })
