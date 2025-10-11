@@ -6,6 +6,7 @@ export default class Control {
       const newTodo = await Task.create(req.body);
 
       res.status(201).json({
+        success: 'Success true',
         message: 'Todo added successfully',
         todo: newTodo,
       });
@@ -73,6 +74,7 @@ export default class Control {
         throw error;
       }
       res.status(200).json({
+        success: 'success true',
         message: 'Todo updated successfully',
         task: updatedTask,
       });
@@ -89,7 +91,11 @@ export default class Control {
         return res.status(404).json({ message: 'Task not found' });
       }
 
-      res.status(200).json({ message: 'Task deleted successfully' });
+      res.status(200).json({
+        success: 'success true',
+        message: 'Task deleted successfully',
+        todo: deletedTask,
+      });
     } catch (err) {
       next(err);
     }
@@ -99,7 +105,9 @@ export default class Control {
     try {
       await Task.deleteMany({ isCompleted: 'true' });
 
-      res.status(200).json({ message: 'cleared completed tasks' });
+      res
+        .status(200)
+        .json({ success: 'success true', message: 'cleared completed tasks' });
     } catch (err) {
       next(err);
     }
@@ -109,7 +117,9 @@ export default class Control {
     try {
       await Task.deleteMany({});
 
-      res.status(200).json({ message: 'All tasks cleared' });
+      res
+        .status(200)
+        .json({ success: 'success true', message: 'All tasks cleared' });
     } catch (err) {
       next(err);
     }

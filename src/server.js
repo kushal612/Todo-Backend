@@ -28,8 +28,6 @@ app.use((err, res, req, next) => {
   }
 });
 
-//app.use('/api/tasks', router)
-
 app.listen(port, () => {
   console.log(`"message": "server is up and running"`);
 });
