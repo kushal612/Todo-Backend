@@ -1,8 +1,3 @@
-// import fs from 'fs'
-// import path from 'path'
-// //import { randomUUID } from 'crypto'
-// //import { getISTLocalizedTime } from '../utils/utils.js'
-
 import Task from '../model/taskModel.js';
 
 export default class Control {
@@ -19,11 +14,37 @@ export default class Control {
     }
   };
 
-  getDocument = async (req, res, next) => {
+  getDocuments = async (req, res, next) => {
     try {
-      const allTask = await Task.find({});
+      const { search, filter, priority } = req.query;
+      const query = {};
 
-      res.status(200).json(allTask);
+      if (filter === 'completed') {
+        query.isCompleted = true;
+      } else if (filter === 'pending') {
+        query.isCompleted = false;
+      }
+
+      if (priority === 'important') {
+        query.isImportant = true;
+      } else if (priority === 'normal') {
+        query.isImportant = false;
+      }
+
+      if (search) {
+        const regex = new RegExp(search, 'i');
+        query.$or = [{ title: { $regex: regex } }, { tags: { $in: [regex] } }];
+      }
+
+      let tasks = await Task.find(query);
+
+      tasks = tasks.sort((a, b) => {
+        const dateA = a.updatedAt || a.createdAt;
+        const dateB = b.updatedAt || b.createdAt;
+        return new Date(dateB) - new Date(dateA);
+      });
+
+      res.status(200).json(tasks);
     } catch (err) {
       next(err);
     }
@@ -31,16 +52,8 @@ export default class Control {
 
   getDocumentById = async (req, res, next) => {
     try {
-      const id = req.params.id;
-      // console.log(`Fetching task with id: ${id}`);
-      const task = await Task.findById(id);
-
-      if (!task) {
-        const error = new Error(`Todo with id ${id} not found`);
-
-        error.statusCode = 404;
-        throw error;
-      }
+      const task = await Task.findById(req.params.id);
+      if (!task) return res.status(404).json({ message: 'Task not found' });
       res.status(200).json(task);
     } catch (err) {
       next(err);
@@ -50,19 +63,15 @@ export default class Control {
   updateDocument = async (req, res, next) => {
     try {
       const id = req.params.id;
-      console.log(`Updating task with id: ${id}`);
-
       const updatedTask = await Task.findByIdAndUpdate(id, req.body, {
         new: true,
         runValidators: true,
       });
-
       if (!updatedTask) {
         const error = new Error(`Todo with id ${id} not found`);
         error.statusCode = 404;
         throw error;
       }
-
       res.status(200).json({
         message: 'Todo updated successfully',
         task: updatedTask,
@@ -74,206 +83,35 @@ export default class Control {
 
   deleteById = async (req, res, next) => {
     try {
-      const id = req.params.id;
-      console.log(`Deleting task with id: ${id}`);
-
-      const deletedTask = await Task.findByIdAndDelete(id);
+      const deletedTask = await Task.findByIdAndDelete(req.params.id);
 
       if (!deletedTask) {
-        const error = new Error(`Todo with id ${id} not found.`);
-        error.statusCode = 404;
-        throw error;
+        return res.status(404).json({ message: 'Task not found' });
       }
 
-      console.log(`Task with id: ${id} is deleted`);
-      res.status(200).json({ message: 'Todo deleted successfully' });
+      res.status(200).json({ message: 'Task deleted successfully' });
     } catch (err) {
       next(err);
     }
   };
 
-  searchDocuments = async (req, res, next) => {
+  clearCompletedTasks = async (req, res, next) => {
     try {
-      const { isImportant, isCompleted, tags, title } = req.query;
+      await Task.deleteMany({ isCompleted: 'true' });
 
-      let filter = {};
+      res.status(200).json({ message: 'cleared completed tasks' });
+    } catch (err) {
+      next(err);
+    }
+  };
 
-      if (isImportant === 'true') {
-        filter.isImportant = true;
-      } else if (isImportant === 'false') {
-        filter.isImportant = false;
-      }
+  clearAllTasks = async (req, res, next) => {
+    try {
+      await Task.deleteMany({});
 
-      if (isCompleted === 'true') {
-        filter.isCompleted = true;
-      } else if (isCompleted === 'false') {
-        filter.isCompleted = false;
-      }
-
-      if (title || tags) {
-        const searchTerm = title || tags;
-        const searchRegex = new RegExp(searchTerm, 'i');
-
-        // filter.$or = [
-        //   { title: { $regex: searchRegex } },
-        //   { tags: { $in: [searchRegex] } },
-        // ]
-
-        filter = {
-          $or: [
-            //it takes array
-            { title: { $regex: searchRegex } },
-            { tags: { $in: [searchRegex] } },
-          ],
-        };
-      }
-
-      const tasks = await Task.find(filter);
-
-      if (tasks.length === 0 && Object.keys(filter).length > 0) {
-        return res.status(404).json({
-          message: 'No tasks found matching your search criteria.',
-        });
-      }
-
-      res.status(200).json(tasks);
+      res.status(200).json({ message: 'All tasks cleared' });
     } catch (err) {
       next(err);
     }
   };
 }
-
-// const dbPath = path.join('__dirname', 'db.json')
-
-// function readTask() {
-//   return new Promise((resolve, reject) => {
-//     fs.readFile(dbPath, 'utf-8', (err, data) => {
-//       if (err) {
-//         return reject(err)
-//       } else {
-//         try {
-//           const db = JSON.parse(data)
-//           resolve(db.todos || [])
-//         } catch (e) {
-//           reject(e)
-//         }
-//       }
-//     })
-//   })
-// }
-
-// function writeTask(tasks) {
-//   return new Promise((resolve, reject) => {
-//     const db = { todos: tasks }
-//     fs.writeFile(dbPath, JSON.stringify(db, null, 2), (err) => {
-//       if (err) {
-//         return reject(err)
-//       } else {
-//         try {
-//           resolve()
-//         } catch (e) {
-//           reject(e)
-//         }
-//       }
-//     })
-//   })
-// }
-
-// export async function getTasks(req, res, next) {
-//   try {
-//     const { search, status = 'all', priority } = req.query
-//     const data = await readTask()
-//     let tasks = data.todos
-
-//     if (search && typeof search === 'string') {
-//       const searchText = search.toLowerCase()
-
-//       tasks = tasks.filter((task) => {
-//         return (
-//           task.title?.toLowerCase().includes(searchText) ||
-//           task.isImpotant?.toLowerCase().includes(searchText) ||
-//           task.tags?.some((tag) => tag.toLowerCase().includes(searchText))
-//         )
-//       })
-//     }
-
-//     if (status === 'completed') {
-//       tasks = tasks.filter((task) => {
-//         task.isCompleted === 'true'
-//       })
-//     } else if (status === 'pending') {
-//       tasks = tasks.filter((task) => {
-//         task.isCompleted === 'false'
-//       })
-//     }
-
-//     if (priority && typeof priority === 'string') {
-//       tasks = tasks.filter((task) => {
-//         task.isImpotant?.toLowerCase() === priority.toLowerCase()
-//       })
-//     }
-
-//     tasks.sort((a, b) => {
-//       if (a.updatedAt || b.updatedAt)
-//         return new Date(b.updatedAt) - new Date(a.updatedAt)
-//       return new Date(b.createdAt) - new Date(a.createdAt)
-//     })
-
-//     res.json(tasks)
-//   } catch (e) {
-//     next(e)
-//   }
-// }
-
-// export async function addTask(req, res, next) {
-//   const validatedData = await validateRequest(taskCreateSchema, req.body, next)
-//   if (!validatedData) return
-//   try {
-//     const newTask = validatedData
-//     const data = await readTask()
-//     data.tasks.push(newTask)
-//     await writeTask(data)
-
-//     res.status(201).json(newTask)
-//   } catch (err) {
-//     if (err.name === 'ValidationError') {
-//       err.status = 400
-//     }
-//     next(err)
-//   }
-// }
-
-// export async function deleteTask(req, res, next) {
-//   try {
-//     const todos = await readTask()
-//     const deleteTodoId = parseInt(req.params.id)
-//     const index = todos.findIndex((todo) => todo.id === deleteTodoId)
-//     if (index === -1) {
-//       return res.status(404).json({ message: 'Todo not found' })
-//     } else {
-//       res.json(todos[index])
-//       todos.splice(index, 1)
-//       await writeTask(todos)
-//       res.status(201).json({ message: 'todo deleted successfully' })
-//     }
-//   } catch (e) {
-//     next(e)
-//   }
-// }
-
-// export async function updateTask(req, res, next) {
-//   try {
-//     const todos = await readTask()
-//     const updateTodoId = parseInt(req.params.id)
-//     const index = todos.findIndex((todo) => todo.id === updateTodoId)
-//     if (index === -1) {
-//       return res.status(404).json({ message: 'Todo not found' })
-//     } else {
-//       todos[index] = { ...todos[index], ...req.body }
-//       await writeTask(todos)
-//       res.status(201).json(todos[index])
-//     }
-//   } catch (e) {
-//     next(e)
-//   }
-// }
