@@ -23,15 +23,15 @@ app.use('/protected', protectedRoute);
 app.use('/api', router);
 
 // eslint-disable-next-line
-app.use((err, res, req, next) => {
+app.use((err, req, res, next) => {
   try {
     const status = err.status || 500;
 
-    res.status(status).join({
+    res.status(status).json({
       error: err.message || 'Server Error',
     });
   } catch (e) {
-    res.status(400).json('error: ', e);
+    res.status(500).json({ error: e.message });
   }
 });
 

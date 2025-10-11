@@ -27,7 +27,7 @@ export default class AuthenticationController {
     try {
       const secreteKey = process.env.JWT_SECRET_KEY;
       const { email, password } = req.body;
-      const user = await User.findOne(email);
+      const user = await User.findOne({ email });
 
       if (!user) {
         return res.status(401).json({ error: 'User no Found' });
