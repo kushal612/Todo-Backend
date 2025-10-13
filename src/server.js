@@ -6,6 +6,7 @@ import connectDB from './db/mongo.js';
 import authRouter from './routes/authRoutes.js';
 import protectedRoute from './routes/authProtectedRouter.js';
 import loggerMiddleware from './middlewares/logger.js';
+import otpRouter from './routes/otpRoute.js';
 
 dotenv.config();
 const port = process.env.PORT;
@@ -20,7 +21,7 @@ app.use(loggerMiddleware);
 app.use(router);
 app.use('/auth', authRouter);
 app.use('/protected', protectedRoute);
-
+app.use('/otp', otpRouter);
 app.use('/api', router);
 
 // eslint-disable-next-line
