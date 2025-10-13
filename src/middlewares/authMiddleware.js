@@ -1,22 +1,19 @@
-export default function loggerMiddleware(req, res, next) {
+import jwt from 'jsonwebtoken';
+
+export default function verifyToken(req, res, next) {
+  const token = req.headers['authorization'];
+
+  if (!token) {
+    return res.status(403).json({ error: 'No token provided' });
+  }
+
   try {
-    const { body, headers, params, query, originalUrl, baseUrl, host } = req;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-    console.log(':::::::::::::::::::::Incoming Request:::::::::::::::::::::');
-    console.log({
-      body,
-      headers,
-      params,
-      query,
-      originalUrl,
-      baseUrl,
-      host,
-      time: new Date().toLocaleTimeString(),
-    });
-    console.log(':::::::::::::::::::::Request Ends:::::::::::::::::::::');
-
+    req.userId = decoded.userId;
     next();
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+    next(err);
   }
 }

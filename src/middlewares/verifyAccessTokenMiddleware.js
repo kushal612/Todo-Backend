@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
-export default function verifyToken(req, res, next) {
+export default function verifyAccessToken(req, res, next) {
   dotenv.config();
 
   const secretKey = process.env.JWT_SECRET_KEY;

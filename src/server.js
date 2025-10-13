@@ -5,7 +5,7 @@ import cors from 'cors';
 import connectDB from './db/mongo.js';
 import authRouter from './routes/authRoutes.js';
 import protectedRoute from './routes/authProtectedRouter.js';
-import authMiddleware from './middlewares/authMiddleware.js';
+import loggerMiddleware from './middlewares/logger.js';
 
 dotenv.config();
 const port = process.env.PORT;
@@ -16,7 +16,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use(authMiddleware);
+app.use(loggerMiddleware);
 app.use(router);
 app.use('/auth', authRouter);
 app.use('/protected', protectedRoute);
