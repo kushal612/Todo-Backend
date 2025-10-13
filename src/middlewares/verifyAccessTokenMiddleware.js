@@ -1,14 +1,20 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+//import { refreshTokens } from '../controller/authControler.js';
+dotenv.config();
 
 export default function verifyAccessToken(req, res, next) {
-  dotenv.config();
-
   const secretKey = process.env.JWT_SECRET_KEY;
-  const authHeader = req.header('Authorization');
-  const token = authHeader && authHeader.split('')[1];
+  const secretRefreshKey = process.env.JWT_REFRESH_KEY;
+
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  //const authRefHeader = req.header('Authorization');
+  const refreshToken = authHeader && authHeader.split('')[2];
 
   console.log(token);
+  console.log(refreshToken);
   if (!token) {
     res.status(401).json({ success: false, message: 'Token Not found' });
   }

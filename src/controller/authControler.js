@@ -5,13 +5,11 @@ import User from '../model/userModel.js';
 
 dotenv.config();
 
-const refreshTokens = [];
+export const refreshTokens = [];
 
 export default class AuthenticationController {
   registerUser = async (req, res, next) => {
     try {
-      res.cookie('title', 'Kushal Singha');
-
       const { email, password } = req.body;
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = new User({ email, password: hashedPassword });
@@ -58,7 +56,7 @@ export default class AuthenticationController {
 
       delete user._doc.password;
 
-      res.status(200).json({ success: true, token, user });
+      res.status(200).json({ success: true, token, refreshToken, user });
     } catch (err) {
       res.status(500).json({ error: `Login failed: ${err}` });
       next(err);

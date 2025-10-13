@@ -9,6 +9,6 @@ protectedRoute.get('/', verifyAccessToken, (req, res) => {
 });
 
 protectedRoute.post('/', verifyRefreshToken, (req, res) => {
-  res.status(200).json({ message: 'Refresh token generate' });
+  res.status(200).json({ message: 'Refresh token' });
 });
 export default protectedRoute;

@@ -20,6 +20,7 @@ app.use(loggerMiddleware);
 app.use(router);
 app.use('/auth', authRouter);
 app.use('/protected', protectedRoute);
+
 app.use('/api', router);
 
 // eslint-disable-next-line
