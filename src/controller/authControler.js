@@ -1,7 +1,8 @@
-import jwt from 'jsonwebtoken';
+//import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import User from '../model/userModel.js';
+import tokenGenerator from '../services/tokenGenerator.js';
 
 dotenv.config();
 
@@ -28,7 +29,8 @@ export default class AuthenticationController {
 
   loginUser = async (req, res, next) => {
     try {
-      const secreteKey = process.env.JWT_SECRET_KEY;
+      const accessKey = process.env.JWT_SECRET_KEY;
+      const refreshKey = process.env.JWT_REFRESH_KEY;
       const { email, password } = req.body;
 
       const user = await User.findOne({ email });
@@ -43,20 +45,22 @@ export default class AuthenticationController {
         return res.status(401).json({ error: 'Password is Wrong' });
       }
 
-      const token = jwt.sign({ userId: user._id }, secreteKey, {
-        expiresIn: '1h',
-      });
+      const accessToken = tokenGenerator.generateAccessToken(
+        user._id,
+        accessKey,
+        process.env.JWT_EXPIRATION
+      );
 
-      const refreshToken = jwt.sign(
-        { userId: user._id },
-        process.env.JWT_REFRESH_KEY,
-        { expiresIn: '7d' }
+      const refreshToken = tokenGenerator.generateAccessToken(
+        user._id,
+        refreshKey,
+        process.env.JWT_REFRESH_EXPIRATION
       );
       refreshTokens.push(refreshToken);
 
       delete user._doc.password;
 
-      res.status(200).json({ success: true, token, refreshToken, user });
+      res.status(200).json({ success: true, accessToken, refreshToken, user });
     } catch (err) {
       res.status(500).json({ error: `Login failed: ${err}` });
       next(err);
