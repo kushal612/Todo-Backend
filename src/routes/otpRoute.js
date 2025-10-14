@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import { sendOTP, verifyOTP } from '../controller/otpController.js';
 import AuthenticationController from '../controller/authControler.js';
+import isVerified from '../middlewares/isVerified.js';
 
 const authentication = new AuthenticationController();
 const otpRouter = Router();
 
-otpRouter.post('/send-otp', sendOTP);
+otpRouter.post('/send-otp', isVerified, sendOTP);
 otpRouter.post('/verifyOTP', verifyOTP);
 
 otpRouter.post('/forgot-password/sendOTP', sendOTP);

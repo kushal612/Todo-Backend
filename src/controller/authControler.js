@@ -1,9 +1,11 @@
-//import jwt from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import User from '../model/userModel.js';
 import tokenGenerator from '../services/tokenGenerator.js';
 //import OTP from '../model/otpModel.js';
+import { LocalStorage } from 'node-localstorage';
+const localStorage = new LocalStorage('./scratch');
 
 dotenv.config();
 
@@ -17,6 +19,7 @@ export default class AuthenticationController {
       //   console.log(username, password, hashedPass)
 
       const user = new User({ email, password: hashedPass });
+
       await user.save();
 
       res.status(201).json({ success: true, user });
@@ -54,6 +57,7 @@ export default class AuthenticationController {
         refreshKey,
         process.env.JWT_REFRESH_EXPIRATION
       );
+
       refreshTokens.push(refresh_Token);
 
       delete user._doc.password;
@@ -79,6 +83,7 @@ export default class AuthenticationController {
 
     try {
       const user = await User.findOne({ email });
+
       if (!user) {
         return res
           .status(404)
@@ -86,6 +91,7 @@ export default class AuthenticationController {
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
+
       user.password = hashedPassword;
       await user.save();
 
@@ -95,6 +101,7 @@ export default class AuthenticationController {
       });
     } catch (error) {
       console.error(error);
+
       return res.status(500).json({
         success: false,
         message: 'An error occurred while updating the password.',
@@ -103,7 +110,6 @@ export default class AuthenticationController {
   };
 
   resetPassword = async (req, res) => {
-    //const { userId } = req.user;
     const { email, currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
@@ -115,6 +121,7 @@ export default class AuthenticationController {
 
     try {
       const user = await User.findOne({ email });
+
       if (!user) {
         return res
           .status(404)
@@ -122,6 +129,7 @@ export default class AuthenticationController {
       }
 
       const isMatch = await bcrypt.compare(currentPassword, user.password);
+
       if (!isMatch) {
         return res
           .status(401)
@@ -129,6 +137,7 @@ export default class AuthenticationController {
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
+
       user.password = hashedPassword;
       await user.save();
 
@@ -138,9 +147,47 @@ export default class AuthenticationController {
       });
     } catch (error) {
       console.error(error);
+
       return res.status(500).json({
         success: false,
         message: 'An error occurred while resetting the password.',
+      });
+    }
+  };
+
+  refreshAccessToken = (req, res) => {
+    const refresh_token = localStorage['refresh_token']
+      ? JSON.parse(localStorage['refresh_token'])
+      : null;
+
+    if (!refresh_token) {
+      return res.status(401).json({ message: 'Refresh Token is required' });
+    }
+    try {
+      const refreshPayload = jwt.verify(
+        refresh_token,
+        process.env.JWT_REFRESH_KEY
+      );
+      const newAccessToken = tokenGenerator.generateAccess_token(
+        { userId: refreshPayload.userId },
+        process.env.JWT_SECRET_KEY,
+        process.env.JWT_EXPIRATION
+      );
+      const newRefreshToken = tokenGenerator.generateRefresh_token(
+        { userId: refreshPayload.userId },
+        process.env.JWT_REFRESH_KEY,
+        process.env.JWT_REFRESH_EXPIRATION
+      );
+
+      console.log(newAccessToken, newRefreshToken);
+
+      return res.status(200).json({
+        message: 'New Access and Refresh Tokens generated successfully',
+      });
+    } catch (error) {
+      return res.status(401).json({
+        message: 'Session expired. Please login again.',
+        error: error.message,
       });
     }
   };
