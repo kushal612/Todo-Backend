@@ -43,13 +43,13 @@ export default class AuthenticationController {
         return res.status(401).json({ error: 'Password is Wrong' });
       }
 
-      const access_Token = tokenGenerator.generateaccess_token(
+      const access_Token = tokenGenerator.generateAccess_token(
         user._id,
         accessKey,
         process.env.JWT_EXPIRATION
       );
 
-      const refresh_Token = tokenGenerator.generaterefresh_token(
+      const refresh_Token = tokenGenerator.generateRefresh_token(
         user._id,
         refreshKey,
         process.env.JWT_REFRESH_EXPIRATION

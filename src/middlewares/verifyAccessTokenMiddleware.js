@@ -55,7 +55,7 @@ export default async function verifyToken(req, res, next) {
             process.env.JWT_REFRESH_KEY
           );
 
-          const newaccess_token = tokenGenerator.generateaccess_token(
+          const newaccess_token = tokenGenerator.generateAccess_token(
             { userId: refreshPayload.userId },
             process.env.JWT_SECRET_KEY,
             process.env.JWT_EXPIRATION
