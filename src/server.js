@@ -22,7 +22,7 @@ app.use(router);
 app.use('/auth', authRouter);
 app.use('/protected', protectedRoute);
 app.use('/otp', otpRouter);
-app.use('/api', router);
+app.use('/todos', router);
 
 // eslint-disable-next-line
 app.use((err, req, res, next) => {

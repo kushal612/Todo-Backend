@@ -1,16 +1,30 @@
+import OTP from '../model/otpModel.js';
 import mailSender from '../utils/mailSender.js';
 
-export async function sendVerificationEmail(email, otp) {
+export async function sendVerificationEmail(email, otpValue) {
   try {
-    const mailResponse = await mailSender(
+    await mailSender(
       email,
-      'Verification Email',
-      `<h1>Please confirm your OTP</h1>
-       <p>Here is your OTP code: ${otp}</p>`
+      'Your OTP Code',
+      `<h1>Verification Code</h1><p>Your OTP is: <strong>${otpValue}</strong></p>`
     );
-    console.log('Email sent successfully: ', mailResponse);
+
+    await OTP.findOneAndUpdate(
+      { email },
+      {
+        $push: {
+          otps: {
+            otp: otpValue,
+            createdAt: new Date(),
+          },
+        },
+      },
+      { upsert: true, new: true }
+    );
+
+    console.log(`OTP saved and email sent to ${email}`);
   } catch (error) {
-    console.log('Error occurred while sending email: ', error);
+    console.error('Failed to create/send OTP:', error);
     throw error;
   }
 }

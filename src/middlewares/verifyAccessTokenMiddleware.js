@@ -1,20 +1,20 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-//import { refreshTokens } from '../controller/authControler.js';
+//import { refresh_tokens } from '../controller/authControler.js';
 import tokenGenerator from '../services/tokenGenerator.js';
 
 dotenv.config();
 
-// export default function verifyAccessToken(req, res, next) {
+// export default function verify access_token(req, res, next) {
 //   const secretKey = process.env.JWT_SECRET_KEY;
 
 //   const authHeader = req.headers['authorization'];
 //   const token = authHeader && authHeader.split(' ')[1];
 
 //   //const authRefHeader = req.headers('Authorization');
-//   const refreshToken = authHeader && authHeader.split('')[2];
+//   const refresh_token = authHeader && authHeader.split('')[2];
 
-//   console.log(token, refreshToken);
+//   console.log(token, refresh_token);
 
 //   if (!token) {
 //     res.status(401).json({ success: false, message: 'Token Not found' });
@@ -33,45 +33,43 @@ dotenv.config();
 export default async function verifyToken(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
-    const accessToken = authHeader && authHeader.split(' ')[1];
-    const refreshToken = authHeader && authHeader.split(' ')[2];
+    const access_token = authHeader && authHeader.split(' ')[1];
+    const refresh_token = authHeader && authHeader.split(' ')[2];
 
-    if (!accessToken) {
+    if (!access_token) {
       return res.status(401).json({
         message: 'Access denied. No token provided.',
       });
     }
 
     try {
-      const decoded = jwt.verify(accessToken, process.env.JWT_SECRET_KEY);
+      const decoded = jwt.verify(access_token, process.env.JWT_SECRET_KEY);
       console.log(decoded);
       req.user = decoded;
       return next();
     } catch (error) {
-      if (error.name === 'TokenExpiredError' && refreshToken) {
+      if (error.name === 'TokenExpiredError' && refresh_token) {
         try {
           const refreshPayload = jwt.verify(
-            refreshToken,
+            refresh_token,
             process.env.JWT_REFRESH_KEY
           );
 
-          const newAccessToken = tokenGenerator.generateAccessToken(
+          const newaccess_token = tokenGenerator.generateaccess_token(
             { userId: refreshPayload.userId },
             process.env.JWT_SECRET_KEY,
             process.env.JWT_EXPIRATION
           );
-          console.log(newAccessToken);
+          console.log(newaccess_token);
 
           res.setHeader(
             'authorization',
-            'Bearer ' + newAccessToken + ' ' + refreshToken
+            'Bearer ' + newaccess_token + ' ' + refresh_token
           );
 
-          // Set user from refresh token payload
           req.user = refreshPayload;
           return next();
         } catch (refreshError) {
-          // Refresh token is also invalid or expired
           return res.status(401).json({
             message: 'Session expired. Please login again.',
             refreshError: refreshError.message,
