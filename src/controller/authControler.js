@@ -158,6 +158,24 @@ export default class AuthenticationController {
     }
   };
 
+  logoutUser = async (req, res, next) => {
+    try {
+      const { userId } = req.body;
+
+      const user = await User.findById(userId);
+
+      if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+      }
+      await user.save();
+
+      res.status(200).json({ message: 'Logged out successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   refreshAccessToken = (req, res) => {
     const refresh_token = localStorage['refresh_token']
       ? JSON.parse(localStorage['refresh_token'])
