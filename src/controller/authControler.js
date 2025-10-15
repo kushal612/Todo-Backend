@@ -16,14 +16,13 @@ export default class AuthenticationController {
     try {
       const { email, password } = req.body;
       const hashedPass = await bcrypt.hash(password, 10);
-      //   console.log(username, password, hashedPass)
-
       const user = new User({ email, password: hashedPass });
 
       await user.save();
 
       res.status(201).json({ success: true, user });
     } catch (error) {
+      res.status(500).json({ success: false, Error: error.message });
       next(error);
     }
   };
@@ -46,6 +45,10 @@ export default class AuthenticationController {
         return res.status(401).json({ error: 'Password is Wrong' });
       }
 
+      if (!user.verified) {
+        return res.status(401).json({ error: 'User not verified' });
+      }
+
       const access_Token = tokenGenerator.generateAccess_token(
         user._id,
         accessKey,
@@ -66,7 +69,7 @@ export default class AuthenticationController {
         .status(200)
         .json({ success: true, access_Token, refresh_Token, user });
     } catch (err) {
-      res.status(500).json({ error: `Login failed: ${err}` });
+      res.status(404).json({ error: `Login failed: ${err}` });
       next(err);
     }
   };

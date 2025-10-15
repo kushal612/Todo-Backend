@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-//import { sendVerificationEmail } from '../services/sendVerificationMail.js';
+import { sendVerificationEmail } from '../services/sendVerificationMail.js';
 
 const otpSubSchema = new mongoose.Schema(
   {
@@ -15,6 +15,7 @@ const otpSubSchema = new mongoose.Schema(
       type: Date,
       default: () => new Date(Date.now() + 5 * 60 * 1000),
     },
+    userId: { type: mongoose.Types.ObjectId, ref: 'User' },
   },
   { _id: false }
 );
@@ -28,6 +29,13 @@ const otpSchema = new mongoose.Schema({
   otps: [otpSubSchema],
 });
 
+otpSchema.pre('save', async function (next) {
+  console.log('New document saved to the database');
+  if (this.isNew) {
+    await sendVerificationEmail(this.email, this.otp);
+  }
+  next();
+});
 const OTP = mongoose.model('OTP', otpSchema);
 
 export default OTP;

@@ -5,10 +5,13 @@ export default async function isVerified(req, res, next) {
     const { email } = req.body;
     const userExists = await User.findOne({ email });
     if (userExists.verified) {
-      res.status(400).json({ message: 'User already verified and registered' });
+      return res.status(401).json({
+        success: false,
+        message: 'User is already registered and verified',
+      });
     }
     next();
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 }
