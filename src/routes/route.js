@@ -10,19 +10,16 @@ router.use((req, res, next) => {
   console.log(`Route middleware: ${req.method} ${req.url}`);
   next();
 });
-
 router.post(
   '/tasks',
   validationMiddleware.validateRequest,
   control.postDocument
 );
-
 router.put(
   '/tasks/:id',
   validationMiddleware.updateRequest,
   control.updateDocument
 );
-
 router.get('/tasks', control.getDocuments);
 router.get('/tasks/:id', control.getDocumentById);
 router.delete('/tasks/:id', control.deleteById);

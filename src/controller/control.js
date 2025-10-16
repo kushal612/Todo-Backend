@@ -68,11 +68,13 @@ export default class Control {
         new: true,
         runValidators: true,
       });
+
       if (!updatedTask) {
         const error = new Error(`Todo with id ${id} not found`);
         error.statusCode = 404;
         throw error;
       }
+
       res.status(200).json({
         success: 'success true',
         message: 'Todo updated successfully',

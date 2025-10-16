@@ -32,14 +32,22 @@ export default class AuthenticationController {
       const accessKey = process.env.JWT_SECRET_KEY;
       const refreshKey = process.env.JWT_REFRESH_KEY;
       const { email, password } = req.body;
-
       const user = await User.findOne({ email });
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      const access_token = tokenGenerator.generateAccess_token(
+        user._id,
+        accessKey,
+        process.env.JWT_EXPIRATION
+      );
+      const refresh_token = tokenGenerator.generateRefresh_token(
+        user._id,
+        refreshKey,
+        process.env.JWT_REFRESH_EXPIRATION
+      );
 
       if (!user) {
         return res.status(401).json({ error: 'User no Found' });
       }
-
-      const passwordMatch = await bcrypt.compare(password, user.password);
 
       if (!passwordMatch) {
         return res.status(401).json({ error: 'Password is Wrong' });
@@ -49,25 +57,13 @@ export default class AuthenticationController {
         return res.status(401).json({ error: 'User not verified' });
       }
 
-      const access_Token = tokenGenerator.generateAccess_token(
-        user._id,
-        accessKey,
-        process.env.JWT_EXPIRATION
-      );
-
-      const refresh_Token = tokenGenerator.generateRefresh_token(
-        user._id,
-        refreshKey,
-        process.env.JWT_REFRESH_EXPIRATION
-      );
-
-      refreshTokens.push(refresh_Token);
+      refreshTokens.push(refresh_token);
 
       delete user._doc.password;
 
       res
         .status(200)
-        .json({ success: true, access_Token, refresh_Token, user });
+        .json({ success: true, access_token, refresh_token, user });
     } catch (err) {
       res.status(404).json({ error: `Login failed: ${err}` });
       next(err);
@@ -86,14 +82,13 @@ export default class AuthenticationController {
 
     try {
       const user = await User.findOne({ email });
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
 
       if (!user) {
         return res
           .status(404)
           .json({ success: false, message: 'User not found.' });
       }
-
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
 
       user.password = hashedPassword;
       await user.save();
@@ -104,7 +99,6 @@ export default class AuthenticationController {
       });
     } catch (error) {
       console.error(error);
-
       return res.status(500).json({
         success: false,
         message: 'An error occurred while updating the password.',
@@ -124,6 +118,8 @@ export default class AuthenticationController {
 
     try {
       const user = await User.findOne({ email });
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
 
       if (!user) {
         return res
@@ -131,17 +127,14 @@ export default class AuthenticationController {
           .json({ success: false, message: 'User not found.' });
       }
 
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
-
       if (!isMatch) {
         return res
           .status(401)
           .json({ success: false, message: 'Current password is incorrect.' });
       }
 
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-
       user.password = hashedPassword;
+
       await user.save();
 
       return res.status(200).json({
@@ -150,7 +143,6 @@ export default class AuthenticationController {
       });
     } catch (error) {
       console.error(error);
-
       return res.status(500).json({
         success: false,
         message: 'An error occurred while resetting the password.',
@@ -161,13 +153,13 @@ export default class AuthenticationController {
   logoutUser = async (req, res, next) => {
     try {
       const { userId } = req.body;
-
       const user = await User.findById(userId);
 
       if (!user) {
         res.status(404);
         throw new Error('User not found');
       }
+
       await user.save();
 
       res.status(200).json({ message: 'Logged out successfully' });
@@ -199,7 +191,6 @@ export default class AuthenticationController {
         process.env.JWT_REFRESH_KEY,
         process.env.JWT_REFRESH_EXPIRATION
       );
-
       console.log(newAccessToken, newRefreshToken);
 
       return res.status(200).json({
