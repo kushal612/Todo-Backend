@@ -3,12 +3,13 @@ export const validateRequest = async (schema, data, next) => {
     const validatedData = await schema.validate(data, {
       abortEarly: false,
       stripUnknown: true,
-    })
-    return validatedData
+    });
+
+    return validatedData;
   } catch (err) {
     if (err.name === 'ValidationError') {
-      err.status = 400
+      err.status = 400;
     }
-    next(err)
+    next(err);
   }
-}
+};

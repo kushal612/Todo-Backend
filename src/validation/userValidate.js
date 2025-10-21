@@ -7,6 +7,7 @@ const validateUser = (userSchema) => async (req, res, next) => {
       abortEarly: false, //returns all errors
       stripUnknown: true,
     });
+
     next();
   } catch (error) {
     if (error instanceof ValidationError) {

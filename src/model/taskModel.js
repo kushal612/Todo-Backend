@@ -2,9 +2,15 @@ import mongoose from 'mongoose';
 
 const taskSchema = new mongoose.Schema(
   {
+    userId: {
+      type: mongoose.Types.ObjectId,
+      ref: 'User',
+    },
     title: {
       type: String,
       required: true,
+      trim: true,
+      minlength: [1, 'Task text cannot be empty'],
     },
     isCompleted: {
       type: Boolean,
@@ -18,7 +24,6 @@ const taskSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
-    userId: { type: mongoose.Types.ObjectId, ref: 'User' },
   },
   {
     timestamps: true,

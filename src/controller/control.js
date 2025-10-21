@@ -3,10 +3,12 @@ import Task from '../model/taskModel.js';
 export default class Control {
   postDocument = async (req, res, next) => {
     try {
-      const newTodo = await Task.create(req.body);
+      const userId = req.user.userId;
+      const newTodo = new Task({ userId, ...req.body });
+      await newTodo.save();
 
       res.status(201).json({
-        success: 'Success true',
+        success: true,
         message: 'Todo added successfully',
         todo: newTodo,
       });
@@ -17,8 +19,9 @@ export default class Control {
 
   getDocuments = async (req, res, next) => {
     try {
+      const userId = req.user.userId;
       const { search, filter, priority } = req.query;
-      const query = {};
+      const query = { userId };
 
       if (filter === 'completed') {
         query.isCompleted = true;
@@ -34,15 +37,13 @@ export default class Control {
 
       if (search) {
         const regex = new RegExp(search, 'i');
+
         query.$or = [{ title: { $regex: regex } }, { tags: { $in: [regex] } }];
       }
 
-      let tasks = await Task.find(query);
-
-      tasks = tasks.sort((a, b) => {
-        const dateA = a.updatedAt || a.createdAt;
-        const dateB = b.updatedAt || b.createdAt;
-        return new Date(dateB) - new Date(dateA);
+      const tasks = await Task.find(query).sort({
+        updatedAt: -1,
+        createdAt: -1,
       });
 
       res.status(200).json(tasks);
@@ -54,7 +55,11 @@ export default class Control {
   getDocumentById = async (req, res, next) => {
     try {
       const task = await Task.findById(req.params.id);
-      if (!task) return res.status(404).json({ message: 'Task not found' });
+
+      if (!task) {
+        return res.status(404).json({ message: 'Task not found' });
+      }
+
       res.status(200).json(task);
     } catch (err) {
       next(err);
@@ -64,15 +69,18 @@ export default class Control {
   updateDocument = async (req, res, next) => {
     try {
       const id = req.params.id;
-      const updatedTask = await Task.findByIdAndUpdate(id, req.body, {
-        new: true,
-        runValidators: true,
-      });
+      const userId = req.user.userId;
+      const updatedTask = await Task.findByIdAndUpdate(
+        { _id: id, userId },
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
 
       if (!updatedTask) {
-        const error = new Error(`Todo with id ${id} not found`);
-        error.statusCode = 404;
-        throw error;
+        return res.status(404).json({ error: 'Task not found' });
       }
 
       res.status(200).json({
@@ -87,7 +95,10 @@ export default class Control {
 
   deleteById = async (req, res, next) => {
     try {
-      const deletedTask = await Task.findByIdAndDelete(req.params.id);
+      const deletedTask = await Task.findByIdAndDelete({
+        _id: req.params.id,
+        userId: req.user.userId,
+      });
 
       if (!deletedTask) {
         return res.status(404).json({ message: 'Task not found' });
@@ -105,7 +116,9 @@ export default class Control {
 
   clearCompletedTasks = async (req, res, next) => {
     try {
-      await Task.deleteMany({ isCompleted: 'true' });
+      const userId = req.user.userId;
+
+      await Task.deleteMany({ userId, isCompleted: 'true' });
 
       res
         .status(200)
@@ -117,7 +130,9 @@ export default class Control {
 
   clearAllTasks = async (req, res, next) => {
     try {
-      await Task.deleteMany({});
+      const userId = req.user.userId;
+
+      await Task.deleteMany({ userId });
 
       res
         .status(200)

@@ -1,5 +1,4 @@
 import * as yup from 'yup';
-//import randomUUID from 'crypto'
 
 export const postSchema = yup.object({
   title: yup

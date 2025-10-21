@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
-import user from '../model/userModel.js';
 
 dotenv.config();
 
@@ -18,15 +17,14 @@ export default async function verifyToken(req, res, next) {
     console.log(access_token);
 
     const decoded = jwt.verify(access_token, process.env.JWT_SECRET_KEY);
-    const uId = decoded.userId;
-    const User = user.findById({ uId });
 
-    req.user = User;
+    req.user = decoded;
     return next();
   } catch (error) {
-    console.log(error);
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'jwt expired' });
+    }
 
-    res.status(401);
-    next(error);
+    return res.status(403).json({ message: 'Invalid token' });
   }
 }

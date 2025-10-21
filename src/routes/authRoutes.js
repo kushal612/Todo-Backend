@@ -13,16 +13,11 @@ authRouter.use((req, res, next) => {
 
 authRouter.post('/sign-up', validateUserSchema, authentication.registerUser);
 authRouter.post('/sign-in', validateUserSchema, authentication.loginUser);
-authRouter.post('/log-out', authentication.logoutUser);
 authRouter.post('/forgot-password/sendOTP', sendOTP);
 authRouter.post('/forgot-password/verifyOTP', verifyOTP);
-
 authRouter.post(
   '/forgot-password/reset',
   authentication.setNewPasswordAfterOTP
 );
-authRouter.post('/reset-password', authentication.resetPassword);
-
-authRouter.post('/refresh-token', authentication.refreshAccessToken);
 
 export default authRouter;

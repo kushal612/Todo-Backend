@@ -3,13 +3,8 @@ import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import User from '../model/userModel.js';
 import tokenGenerator from '../services/tokenGenerator.js';
-//import OTP from '../model/otpModel.js';
-import { LocalStorage } from 'node-localstorage';
-const localStorage = new LocalStorage('./scratch');
 
 dotenv.config();
-
-export const refreshTokens = [];
 
 export default class AuthenticationController {
   registerUser = async (req, res, next) => {
@@ -33,21 +28,12 @@ export default class AuthenticationController {
       const refreshKey = process.env.JWT_REFRESH_KEY;
       const { email, password } = req.body;
       const user = await User.findOne({ email });
-      const passwordMatch = await bcrypt.compare(password, user.password);
-      const access_token = tokenGenerator.generateAccess_token(
-        user._id,
-        accessKey,
-        process.env.JWT_EXPIRATION
-      );
-      const refresh_token = tokenGenerator.generateRefresh_token(
-        user._id,
-        refreshKey,
-        process.env.JWT_REFRESH_EXPIRATION
-      );
 
       if (!user) {
-        return res.status(401).json({ error: 'User no Found' });
+        return res.status(404).json({ error: 'User no Found' });
       }
+
+      const passwordMatch = await bcrypt.compare(password, user.password);
 
       if (!passwordMatch) {
         return res.status(401).json({ error: 'Password is Wrong' });
@@ -57,7 +43,17 @@ export default class AuthenticationController {
         return res.status(401).json({ error: 'User not verified' });
       }
 
-      refreshTokens.push(refresh_token);
+      const access_token = tokenGenerator.generateAccess_token(
+        user._id,
+        accessKey,
+        process.env.JWT_EXPIRATION
+      );
+
+      const refresh_token = tokenGenerator.generateRefresh_token(
+        user._id,
+        refreshKey,
+        process.env.JWT_REFRESH_EXPIRATION
+      );
 
       delete user._doc.password;
 
@@ -71,9 +67,9 @@ export default class AuthenticationController {
   };
 
   setNewPasswordAfterOTP = async (req, res) => {
-    const { email, otp, newPassword } = req.body;
+    const { email, newPassword } = req.body;
 
-    if (!email || !otp || !newPassword) {
+    if (!email || !newPassword) {
       return res.status(400).json({
         success: false,
         message: 'Email, OTP and new password are required.',
@@ -82,13 +78,14 @@ export default class AuthenticationController {
 
     try {
       const user = await User.findOne({ email });
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
 
       if (!user) {
         return res
           .status(404)
           .json({ success: false, message: 'User not found.' });
       }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
 
       user.password = hashedPassword;
       await user.save();
@@ -107,9 +104,9 @@ export default class AuthenticationController {
   };
 
   resetPassword = async (req, res) => {
-    const { email, currentPassword, newPassword } = req.body;
+    const { email, oldPassword, newPassword } = req.body;
 
-    if (!currentPassword || !newPassword) {
+    if (!oldPassword || !newPassword) {
       return res.status(400).json({
         success: false,
         message: 'Current password and new password are required.',
@@ -118,8 +115,6 @@ export default class AuthenticationController {
 
     try {
       const user = await User.findOne({ email });
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
 
       if (!user) {
         return res
@@ -127,14 +122,17 @@ export default class AuthenticationController {
           .json({ success: false, message: 'User not found.' });
       }
 
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+
       if (!isMatch) {
         return res
           .status(401)
-          .json({ success: false, message: 'Current password is incorrect.' });
+          .json({ success: false, message: 'old password is incorrect.' });
       }
 
-      user.password = hashedPassword;
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
 
+      user.password = hashedPassword;
       await user.save();
 
       return res.status(200).json({
@@ -150,28 +148,28 @@ export default class AuthenticationController {
     }
   };
 
-  logoutUser = async (req, res, next) => {
-    try {
-      const { userId } = req.body;
-      const user = await User.findById(userId);
+  // logoutUser = async (req, res, next) => {
+  //   try {
+  //     const { userId } = req.body;
 
-      if (!user) {
-        res.status(404);
-        throw new Error('User not found');
-      }
+  //     const user = await User.findById(userId);
 
-      await user.save();
+  //     if (!user) {
+  //       res.status(404);
+  //       throw new Error('User not found');
+  //     }
+  //     await user.save();
 
-      res.status(200).json({ message: 'Logged out successfully' });
-    } catch (error) {
-      next(error);
-    }
-  };
+  //     res.status(200).json({ message: 'Logged out successfully' });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // };
 
   refreshAccessToken = (req, res) => {
-    const refresh_token = localStorage['refresh_token']
-      ? JSON.parse(localStorage['refresh_token'])
-      : null;
+    const authHeader = req.headers.authorization;
+    const refresh_token = authHeader && authHeader.split(' ')[1];
+    console.log('Refresh Token:', refresh_token);
 
     if (!refresh_token) {
       return res.status(401).json({ message: 'Refresh Token is required' });
@@ -193,7 +191,10 @@ export default class AuthenticationController {
       );
       console.log(newAccessToken, newRefreshToken);
 
-      return res.status(200).json({
+      return res.status(200).send({
+        success: true,
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
         message: 'New Access and Refresh Tokens generated successfully',
       });
     } catch (error) {

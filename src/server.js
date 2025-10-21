@@ -8,12 +8,11 @@ import protectedRoute from './routes/authProtectedRouter.js';
 import loggerMiddleware from './middlewares/logger.js';
 import otpRouter from './routes/otpRoute.js';
 import verifyToken from './middlewares/verifyAccessTokenMiddleware.js';
-//import authRoutes from './routes/authRoutes.js';
-
-dotenv.config();
-const port = process.env.PORT;
 
 connectDB();
+dotenv.config();
+
+const port = process.env.PORT || 3000;
 const app = express();
 
 app.use(cors());
@@ -22,8 +21,19 @@ app.use(loggerMiddleware);
 app.use(router);
 app.use('/api/auth', authRouter, otpRouter);
 app.use('/api/auth/protected', protectedRoute);
-// app.use('/api/todos', router);
 app.use('/api/todos', verifyToken, router);
+
+app.get('/', (req, res) => {
+  res.json({
+    message: 'To-Do List API Server is running!',
+  });
+});
+
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'Route not found',
+  });
+});
 
 // eslint-disable-next-line
 app.use((err, req, res, next) => {
