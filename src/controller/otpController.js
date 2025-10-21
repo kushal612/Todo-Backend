@@ -3,7 +3,7 @@ import OTP from '../model/otpModel.js';
 import User from '../model/userModel.js';
 import { sendVerificationEmail } from '../services/sendVerificationMail.js';
 
-export const sendOTP = async (req, res) => {
+export const sendOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
     const otp = otpGenerator.generate(6, {
@@ -20,12 +20,11 @@ export const sendOTP = async (req, res) => {
       otp,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 };
 
-export const verifyOTP = async (req, res) => {
+export const verifyOTP = async (req, res, next) => {
   const { email, otp } = req.body;
 
   if (!email || !otp) {
@@ -59,10 +58,6 @@ export const verifyOTP = async (req, res) => {
 
     return res.status(200).json({ success: true, message: 'OTP is valid.' });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: 'An error occurred during OTP verification.',
-    });
+    next(error);
   }
 };

@@ -14,6 +14,7 @@ export default class AuthenticationController {
 
       if (existingUser) {
         const error = new Error('User already exists');
+
         error.status = 409;
         return next(error);
       }
@@ -59,7 +60,6 @@ export default class AuthenticationController {
         accessKey,
         process.env.JWT_EXPIRATION
       );
-
       const refresh_token = tokenGenerator.generateRefresh_token(
         user._id,
         refreshKey,

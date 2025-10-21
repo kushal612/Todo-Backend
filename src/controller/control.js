@@ -5,6 +5,7 @@ export default class Control {
     try {
       const userId = req.user.userId;
       const newTodo = new Task({ userId, ...req.body });
+
       await newTodo.save();
 
       res.status(201).json({
