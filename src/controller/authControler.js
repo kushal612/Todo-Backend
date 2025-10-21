@@ -10,14 +10,25 @@ export default class AuthenticationController {
   registerUser = async (req, res, next) => {
     try {
       const { email, password } = req.body;
+      const existingUser = await User.findOne({ email });
+
+      if (existingUser) {
+        const error = new Error('User already exists');
+        error.status = 409;
+        return next(error);
+      }
+
       const hashedPass = await bcrypt.hash(password, 10);
       const user = new User({ email, password: hashedPass });
 
       await user.save();
 
-      res.status(201).json({ success: true, user });
+      res.status(201).json({
+        success: true,
+        user,
+        message: 'User registered successfully.',
+      });
     } catch (error) {
-      res.status(500).json({ success: false, Error: error.message });
       next(error);
     }
   };
@@ -61,12 +72,11 @@ export default class AuthenticationController {
         .status(200)
         .json({ success: true, access_token, refresh_token, user });
     } catch (err) {
-      res.status(404).json({ error: `Login failed: ${err}` });
       next(err);
     }
   };
 
-  setNewPasswordAfterOTP = async (req, res) => {
+  setNewPasswordAfterOTP = async (req, res, next) => {
     const { email, newPassword } = req.body;
 
     if (!email || !newPassword) {
@@ -95,15 +105,11 @@ export default class AuthenticationController {
         message: 'Password updated successfully.',
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while updating the password.',
-      });
+      next(error);
     }
   };
 
-  resetPassword = async (req, res) => {
+  resetPassword = async (req, res, next) => {
     const { email, oldPassword, newPassword } = req.body;
 
     if (!oldPassword || !newPassword) {
@@ -140,31 +146,9 @@ export default class AuthenticationController {
         message: 'Password reset successfully.',
       });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-        success: false,
-        message: 'An error occurred while resetting the password.',
-      });
+      next(error);
     }
   };
-
-  // logoutUser = async (req, res, next) => {
-  //   try {
-  //     const { userId } = req.body;
-
-  //     const user = await User.findById(userId);
-
-  //     if (!user) {
-  //       res.status(404);
-  //       throw new Error('User not found');
-  //     }
-  //     await user.save();
-
-  //     res.status(200).json({ message: 'Logged out successfully' });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // };
 
   refreshAccessToken = (req, res) => {
     const authHeader = req.headers.authorization;
@@ -180,12 +164,12 @@ export default class AuthenticationController {
         process.env.JWT_REFRESH_KEY
       );
       const newAccessToken = tokenGenerator.generateAccess_token(
-        { userId: refreshPayload.userId },
+        refreshPayload.userId,
         process.env.JWT_SECRET_KEY,
         process.env.JWT_EXPIRATION
       );
       const newRefreshToken = tokenGenerator.generateRefresh_token(
-        { userId: refreshPayload.userId },
+        refreshPayload.userId,
         process.env.JWT_REFRESH_KEY,
         process.env.JWT_REFRESH_EXPIRATION
       );
@@ -193,8 +177,8 @@ export default class AuthenticationController {
 
       return res.status(200).send({
         success: true,
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
+        access_token: newAccessToken,
+        refresh_token: newRefreshToken,
         message: 'New Access and Refresh Tokens generated successfully',
       });
     } catch (error) {

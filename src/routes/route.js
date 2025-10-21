@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import Control from '../controller/Control.js';
 import TodoValidations from '../validation/middleware/TodoValidation.js';
-import AuthenticationController from '../controller/authControler.js';
+//import AuthenticationController from '../controller/authControler.js';
 
-const authentication = new AuthenticationController();
+//const authentication = new AuthenticationController();
 const validationMiddleware = new TodoValidations();
 const control = new Control();
 const router = Router();
@@ -20,6 +20,6 @@ router.get('/:id', control.getDocumentById);
 router.delete('/:id', control.deleteById);
 router.delete('/clear/completed', control.clearCompletedTasks);
 router.delete('/clear/all', control.clearAllTasks);
-router.post('/reset-password', authentication.resetPassword);
+// router.post('/reset-password', authentication.resetPassword);
 
 export default router;

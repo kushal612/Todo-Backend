@@ -21,10 +21,7 @@ export default async function verifyToken(req, res, next) {
     req.user = decoded;
     return next();
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ message: 'jwt expired' });
-    }
-
-    return res.status(403).json({ message: 'Invalid token' });
+    res.status(401);
+    next(error);
   }
 }

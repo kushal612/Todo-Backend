@@ -38,7 +38,7 @@ app.use((req, res) => {
 // eslint-disable-next-line
 app.use((err, req, res, next) => {
   try {
-    const status = err.status || 500;
+    const status = res.statusCode === 200 ? 500 : res.statusCode;
 
     res.status(status).json({
       error: err.message || 'Server Error',

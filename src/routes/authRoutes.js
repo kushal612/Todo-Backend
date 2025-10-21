@@ -20,4 +20,5 @@ authRouter.post(
   authentication.setNewPasswordAfterOTP
 );
 
+authRouter.post('/reset-password', authentication.resetPassword);
 export default authRouter;
