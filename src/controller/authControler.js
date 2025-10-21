@@ -13,10 +13,10 @@ export default class AuthenticationController {
       const existingUser = await User.findOne({ email });
 
       if (existingUser) {
-        const error = new Error('User already exists');
-
-        error.status = 409;
-        return next(error);
+        return res.status(409).json({
+          success: false,
+          message: 'User already exists',
+        });
       }
 
       const hashedPass = await bcrypt.hash(password, 10);
@@ -98,6 +98,7 @@ export default class AuthenticationController {
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
       user.password = hashedPassword;
+
       await user.save();
 
       return res.status(200).json({
@@ -151,7 +152,7 @@ export default class AuthenticationController {
     }
   };
 
-  refreshAccessToken = (req, res) => {
+  refreshAccessToken = (req, res, next) => {
     const authHeader = req.headers.authorization;
     const refresh_token = authHeader && authHeader.split(' ')[1];
     console.log('Refresh Token:', refresh_token);
@@ -183,10 +184,8 @@ export default class AuthenticationController {
         message: 'New Access and Refresh Tokens generated successfully',
       });
     } catch (error) {
-      return res.status(401).json({
-        message: 'Session expired. Please login again.',
-        error: error.message,
-      });
+      res.status(401);
+      next(error);
     }
   };
 }
