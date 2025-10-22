@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { sendOTP, verifyOTP } from '../controller/otpController.js';
-import AuthenticationController from '../controller/authControler.js';
+import { sendOTP } from '../controller/otpController.js';
+import AuthenticationController from '../controller/AuthenticationControler.js';
 import { validateUserSchema } from '../validation/userValidate.js';
 
 const authRouter = Router();
@@ -14,7 +14,6 @@ authRouter.use((req, res, next) => {
 authRouter.post('/sign-up', validateUserSchema, authentication.registerUser);
 authRouter.post('/sign-in', validateUserSchema, authentication.loginUser);
 authRouter.post('/forgot-password/sendOTP', sendOTP);
-authRouter.post('/forgot-password/verifyOTP', verifyOTP);
 authRouter.post(
   '/forgot-password/reset',
   authentication.setNewPasswordAfterOTP

@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import User from '../model/userModel.js';
 import tokenGenerator from '../services/tokenGenerator.js';
+import OTP from '../model/otpModel.js';
 
 dotenv.config();
 
@@ -77,9 +78,9 @@ export default class AuthenticationController {
   };
 
   setNewPasswordAfterOTP = async (req, res, next) => {
-    const { email, newPassword } = req.body;
+    const { email, otp, newPassword } = req.body;
 
-    if (!email || !newPassword) {
+    if (!email || !newPassword || !otp) {
       return res.status(400).json({
         success: false,
         message: 'Email, OTP and new password are required.',
@@ -87,6 +88,28 @@ export default class AuthenticationController {
     }
 
     try {
+      const userOtpEntry = await OTP.findOne({ email });
+
+      if (!userOtpEntry || userOtpEntry.otps.length === 0) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'No OTP found for this email.' });
+      }
+
+      const latestOtp = userOtpEntry.otps[userOtpEntry.otps.length - 1];
+
+      if (latestOtp.otp !== otp) {
+        return res
+          .status(401)
+          .json({ success: false, message: 'Invalid OTP.' });
+      }
+
+      if (new Date() > new Date(latestOtp.expiryOTP)) {
+        return res
+          .status(410)
+          .json({ success: false, message: 'OTP has expired.' });
+      }
+
       const user = await User.findOne({ email });
 
       if (!user) {

@@ -1,7 +1,10 @@
 import otpGenerator from 'otp-generator';
 import OTP from '../model/otpModel.js';
 import User from '../model/userModel.js';
+import dotenv from 'dotenv';
 import { sendVerificationEmail } from '../services/sendVerificationMail.js';
+
+dotenv.config();
 
 export const sendOTP = async (req, res, next) => {
   try {
@@ -24,7 +27,7 @@ export const sendOTP = async (req, res, next) => {
   }
 };
 
-export const verifyOTP = async (req, res, next) => {
+export const verifyOtp = async (req, res, next) => {
   const { email, otp } = req.body;
 
   if (!email || !otp) {
@@ -56,7 +59,10 @@ export const verifyOTP = async (req, res, next) => {
 
     await User.findOneAndUpdate({ email }, { verified: true }, { new: true });
 
-    return res.status(200).json({ success: true, message: 'OTP is valid.' });
+    return res.status(200).json({
+      success: true,
+      message: 'OTP is valid.',
+    });
   } catch (error) {
     next(error);
   }

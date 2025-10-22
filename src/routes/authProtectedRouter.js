@@ -1,6 +1,6 @@
 import Router from 'express';
 import verifyAccessToken from '../middlewares/verifyAccessTokenMiddleware.js';
-import AuthenticationController from '../controller/authControler.js';
+import AuthenticationController from '../controller/AuthenticationControler.js';
 
 const authController = new AuthenticationController();
 const protectedRoute = new Router();
