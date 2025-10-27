@@ -211,4 +211,29 @@ export default class AuthenticationController {
       next(error);
     }
   };
+
+  getUser = (req, res) => {
+    const { email, profileImage } = req.user;
+    console.log(email, profileImage);
+
+    res.json({ success: true, result: { email, profileImage } });
+  };
+
+  updateUser = async (req, res, next) => {
+    try {
+      const user = req.user;
+
+      const profileImage = req.file ? req.file.filename : null;
+
+      if (profileImage) {
+        user.profileImage = profileImage;
+      }
+
+      await user.save();
+
+      res.json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  };
 }
