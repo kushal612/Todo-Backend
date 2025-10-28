@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
     cb(null, file.originalname + '_' + uniqueSuffix);
   },
 });
-const upload = multer({ storage });
+const upload = multer({ storage, limits: { fileSize: 500000 } });
 
 authRouter.use((req, res, next) => {
   console.log(`Route middleware: ${req.method} ${req.url}`);
