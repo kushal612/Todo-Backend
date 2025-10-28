@@ -3,11 +3,12 @@ import { sendOTP } from '../controller/otpController.js';
 import AuthenticationController from '../controller/AuthenticationControler.js';
 import { validateUserSchema } from '../validation/userValidate.js';
 import multer from 'multer';
+import verifyToken from '../middlewares/verifyAccessTokenMiddleware.js';
 
 const authRouter = Router();
 const authentication = new AuthenticationController();
 const storage = multer.diskStorage({
-  destination: 'uploads/',
+  destination: 'database/uploads/',
   filename: function (req, file, cb) {
     cb(null, file.originalname);
   },
@@ -27,9 +28,10 @@ authRouter.post(
   authentication.setNewPasswordAfterOTP
 );
 authRouter.post('/reset-password', authentication.resetPassword);
-authRouter.get('/user', authentication.getUser);
+authRouter.get('/user', verifyToken, authentication.getUser);
 authRouter.put(
   '/user',
+  verifyToken,
   upload.single('profile_image'),
   authentication.updateUser
 );

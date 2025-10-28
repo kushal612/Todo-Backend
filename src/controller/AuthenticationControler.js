@@ -212,26 +212,44 @@ export default class AuthenticationController {
     }
   };
 
-  getUser = (req, res) => {
-    const { email, profileImage } = req.user;
-    console.log(email, profileImage);
+  getUser = async (req, res, next) => {
+    try {
+      const userId = req.user.userId;
+      const user = await User.findById(userId);
 
-    res.json({ success: true, result: { email, profileImage } });
+      if (!user) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'User not found.' });
+      }
+
+      const { profileImage } = user;
+      console.log(profileImage);
+      res.json({ success: true, result: { profileImage } });
+    } catch (err) {
+      next(err);
+    }
   };
 
   updateUser = async (req, res, next) => {
     try {
-      const user = req.user;
+      const userId = req.user.userId;
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'User not found.' });
+      }
 
       const profileImage = req.file ? req.file.filename : null;
 
       if (profileImage) {
         user.profileImage = profileImage;
       }
-
       await user.save();
 
-      res.json({ success: true });
+      res.json({ success: true, message: 'User updated successfully.' });
     } catch (err) {
       next(err);
     }
