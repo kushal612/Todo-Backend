@@ -6,7 +6,7 @@ import { sendVerificationEmail } from '../services/sendVerificationMail.js';
 
 dotenv.config();
 
-export const sendOTP = async (req, res, next) => {
+export const sendOtp = async (req, res, next) => {
   try {
     const { email } = req.body;
     const otp = otpGenerator.generate(6, {
@@ -37,21 +37,21 @@ export const verifyOtp = async (req, res, next) => {
   }
 
   try {
-    const userOTPEntry = await OTP.findOne({ email });
+    const userOtpEntry = await OTP.findOne({ email });
 
-    if (!userOTPEntry || userOTPEntry.otps.length === 0) {
+    if (!userOtpEntry || userOtpEntry.otps.length === 0) {
       return res
         .status(404)
         .json({ success: false, message: 'No OTP found for this email.' });
     }
 
-    const latestOTP = userOTPEntry.otps[userOTPEntry.otps.length - 1];
+    const latestOtp = userOtpEntry.otps[userOtpEntry.otps.length - 1];
 
-    if (latestOTP.otp !== otp) {
+    if (latestOtp.otp !== otp) {
       return res.status(401).json({ success: false, message: 'Invalid OTP.' });
     }
 
-    if (new Date() > new Date(latestOTP.expiryOTP)) {
+    if (new Date() > new Date(latestOtp.expiryOtp)) {
       return res
         .status(410)
         .json({ success: false, message: 'OTP has expired.' });

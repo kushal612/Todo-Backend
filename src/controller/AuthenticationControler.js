@@ -77,7 +77,7 @@ export default class AuthenticationController {
     }
   };
 
-  setNewPasswordAfterOTP = async (req, res, next) => {
+  setNewPasswordAfterOtp = async (req, res, next) => {
     const { email, otp, newPassword } = req.body;
 
     if (!email || !newPassword || !otp) {
@@ -104,7 +104,7 @@ export default class AuthenticationController {
           .json({ success: false, message: 'Invalid OTP.' });
       }
 
-      if (new Date() > new Date(latestOtp.expiryOTP)) {
+      if (new Date() > new Date(latestOtp.expiryOtp)) {
         return res
           .status(410)
           .json({ success: false, message: 'OTP has expired.' });

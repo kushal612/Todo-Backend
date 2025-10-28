@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { sendOTP, verifyOtp } from '../controller/otpController.js';
+import { sendOtp, verifyOtp } from '../controller/otpController.js';
 import isVerified from '../middlewares/isVerifiedCheck.js';
 
 const otpRouter = Router();
 
-otpRouter.post('/send-otp', isVerified, sendOTP);
+otpRouter.post('/send-otp', isVerified, sendOtp);
 otpRouter.post('/verifyOtp', verifyOtp);
 
 export default otpRouter;

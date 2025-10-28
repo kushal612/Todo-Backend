@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { sendOTP } from '../controller/otpController.js';
+import { sendOtp } from '../controller/otpController.js';
 import AuthenticationController from '../controller/AuthenticationControler.js';
 import { validateUserSchema } from '../validation/userValidate.js';
 import multer from 'multer';
@@ -23,10 +23,10 @@ authRouter.use((req, res, next) => {
 
 authRouter.post('/sign-up', validateUserSchema, authentication.registerUser);
 authRouter.post('/sign-in', validateUserSchema, authentication.loginUser);
-authRouter.post('/forgot-password/sendOTP', sendOTP);
+authRouter.post('/forgot-password/sendOtp', sendOtp);
 authRouter.post(
   '/forgot-password/reset',
-  authentication.setNewPasswordAfterOTP
+  authentication.setNewPasswordAfterOtp
 );
 authRouter.post('/reset-password', authentication.resetPassword);
 authRouter.get('/user', verifyToken, authentication.getUser);
