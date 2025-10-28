@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import Control from '../controller/Control.js';
+import TodoController from '../controller/TodoController.js';
 import TodoValidations from '../validation/middleware/TodoValidation.js';
 
 const validationMiddleware = new TodoValidations();
-const control = new Control();
+const control = new TodoController();
 const router = Router();
 
 router.use((req, res, next) => {

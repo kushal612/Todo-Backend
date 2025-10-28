@@ -1,6 +1,6 @@
 import Task from '../model/taskModel.js';
 
-export default class Control {
+export default class TodoController {
   postDocument = async (req, res, next) => {
     try {
       const userId = req.user.userId;

@@ -223,9 +223,9 @@ export default class AuthenticationController {
           .json({ success: false, message: 'User not found.' });
       }
 
-      const { profileImage } = user;
-      console.log(profileImage);
-      res.json({ success: true, result: { profileImage } });
+      const { name, profileImage } = user;
+
+      res.json({ success: true, result: { name, profileImage } });
     } catch (err) {
       next(err);
     }
@@ -235,6 +235,7 @@ export default class AuthenticationController {
     try {
       const userId = req.user.userId;
       const user = await User.findById(userId);
+      const { name } = req.body;
 
       if (!user) {
         return res
@@ -247,6 +248,13 @@ export default class AuthenticationController {
       if (profileImage) {
         user.profileImage = profileImage;
       }
+
+      if (!name) {
+        res.status(400);
+        throw new Error('Name cannot be empty');
+      }
+
+      user.name = name;
       await user.save();
 
       res.json({ success: true, message: 'User updated successfully.' });
